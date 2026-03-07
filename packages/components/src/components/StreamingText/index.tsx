@@ -13,10 +13,10 @@ import type { StreamingTextProps } from "./types";
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 
-function getHighlighter(theme: string): Promise<Highlighter> {
+function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
-      themes: [theme],
+      themes: ["github-dark", "github-light-high-contrast"],
       langs: [
         "typescript",
         "javascript",
@@ -115,13 +115,13 @@ export function StreamingText({
   // Initialize shiki highlighter
   useEffect(() => {
     let cancelled = false;
-    getHighlighter(codeTheme).then((hl) => {
+    getHighlighter().then((hl) => {
       if (!cancelled) setHighlighter(hl);
     });
     return () => {
       cancelled = true;
     };
-  }, [codeTheme]);
+  }, []);
 
   // Detect streaming → done transition
   useEffect(() => {
@@ -169,11 +169,12 @@ export function StreamingText({
               try {
                 const html = highlighter.codeToHtml(codeStr, {
                   lang,
-                  theme: codeTheme,
+                  themes: { light: "github-light-high-contrast", dark: "github-dark" },
+                  defaultColor: false,
                 });
                 return (
                   <div
-                    className={cn("rounded-lg overflow-hidden my-3 text-sm", classNames?.codeBlock)}
+                    className={cn("inferface-code-block rounded-lg overflow-hidden my-3 text-sm", classNames?.codeBlock)}
                     role="region"
                     aria-label={`Code block: ${lang}`}
                     dangerouslySetInnerHTML={{ __html: html }}

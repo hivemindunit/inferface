@@ -55,6 +55,16 @@ html:not(.dark) .shiki span { color: var(--shiki-light) !important; }
 html.dark .shiki { background-color: var(--shiki-dark-bg) !important; }
 html:not(.dark) .shiki { background-color: var(--shiki-light-bg) !important; }
 
+/* Code blocks inside prose (chat messages) — match the message bubble bg, not shiki's white */
+.prose .inferface-code-block .shiki,
+.prose pre.shiki {
+  background-color: hsl(var(--muted) / 0.6) !important;
+}
+html.dark .prose .inferface-code-block .shiki,
+html.dark .prose pre.shiki {
+  background-color: hsl(var(--muted) / 0.8) !important;
+}
+
 @layer base {
   * {
     @apply border-border;

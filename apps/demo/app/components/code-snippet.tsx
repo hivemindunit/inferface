@@ -7,7 +7,7 @@ let highlighterPromise: Promise<any> | null = null;
 function getHighlighter() {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
-      themes: ["github-dark", "github-light"],
+      themes: ["github-dark", "github-light-high-contrast"],
       langs: ["typescript", "tsx", "javascript", "jsx", "bash"],
     });
   }
@@ -26,7 +26,7 @@ export function CodeSnippet({ code, lang = "tsx", className }: CodeSnippetProps)
     getHighlighter().then((hl) => {
       const result = hl.codeToHtml(code, {
         lang,
-        themes: { light: "github-light", dark: "github-dark" },
+        themes: { light: "github-light-high-contrast", dark: "github-dark" },
         defaultColor: false, // use CSS vars for dual theme
       });
       setHtml(result);
