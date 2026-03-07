@@ -71,17 +71,17 @@ export default function StreamingDemo() {
               {isLoading && (
                 <button
                   onClick={abort}
-                  className="rounded-lg bg-red-900/50 border border-red-800 px-3 py-1.5 text-sm text-red-300 hover:bg-red-900 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-red-900/50 border border-red-800 px-3 py-1.5 text-sm text-red-300 hover:bg-red-900 transition-colors"
                 >
-                  ⏹ Stop
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="1.5"/></svg> Stop
                 </button>
               )}
               {(completion || error) && !isLoading && (
                 <button
                   onClick={reset}
-                  className="rounded-lg bg-zinc-800 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
                 >
-                  ↺ Reset
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M1 4s1-3 7-3a7 7 0 0 1 0 14c-3 0-5.5-1.5-6.5-3.5"/><path d="M1 1v3h3"/></svg> Reset
                 </button>
               )}
             </div>

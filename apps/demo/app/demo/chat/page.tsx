@@ -121,7 +121,7 @@ export default function ChatDemo() {
                       className="self-center mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-400 text-xs"
                       title="Edit message"
                     >
-                      ✏️
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M11.5 2.5a1.5 1.5 0 0 1 2.1 2.1L5 13.2l-3 .8.8-3 8.7-8.5z"/></svg>
                     </button>
                   )}
 
@@ -163,7 +163,7 @@ export default function ChatDemo() {
                             disabled={!editingContent.trim()}
                             className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40"
                           >
-                            Send ↑
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 13V3m-4 4l4-4 4 4"/></svg>
                           </button>
                         </div>
                       </div>
@@ -256,17 +256,17 @@ export default function ChatDemo() {
                 {isLoading ? (
                   <button
                     onClick={abort}
-                    className="shrink-0 rounded-xl bg-red-900/50 border border-red-800 px-4 py-2.5 text-sm text-red-300 hover:bg-red-900 transition-colors"
+                    className="flex items-center gap-1.5 shrink-0 rounded-xl bg-red-900/50 border border-red-800 px-4 py-2.5 text-sm text-red-300 hover:bg-red-900 transition-colors"
                   >
-                    ⏹ Stop
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="1.5"/></svg> Stop
                   </button>
                 ) : (
                   <button
                     onClick={handleSubmit}
                     disabled={!input.trim()}
-                    className="shrink-0 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 shrink-0 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Send ↑
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 13V3m-4 4l4-4 4 4"/></svg>
                   </button>
                 )}
               </div>
@@ -316,9 +316,9 @@ export default function ChatDemo() {
             <div className="grid grid-cols-2 gap-3">
               {[
                 { icon: "⚡", label: "Optimistic UI", desc: "Messages appear instantly" },
-                { icon: "🔄", label: "Auto rollback", desc: "Failed requests undo cleanly" },
-                { icon: "⏹", label: "Abort support", desc: "Cancel mid-stream" },
-                { icon: "💾", label: "Storage adapters", desc: "Persist to localStorage/DB" },
+                { icon: "↩", label: "Auto rollback", desc: "Failed requests undo cleanly" },
+                { icon: "◼", label: "Abort support", desc: "Cancel mid-stream" },
+                { icon: "⊡", label: "Storage adapters", desc: "Persist to localStorage/DB" },
               ].map((feat) => (
                 <div
                   key={feat.label}

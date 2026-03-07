@@ -28,12 +28,12 @@ const { toolCalls, pendingCalls, resolveToolCall, rejectToolCall, isExecuting } 
 const TOOL_DESCRIPTIONS: Record<string, { label: string; icon: string; desc: string }> = {
   search_flights: {
     label: "Search Flights",
-    icon: "✈️",
+    icon: "✈",
     desc: "Search for available flights",
   },
   get_weather: {
     label: "Check Weather",
-    icon: "🌤️",
+    icon: "☀",
     desc: "Check the weather forecast",
   },
 };
@@ -208,16 +208,16 @@ export default function ToolsDemo() {
                 <button
                   onClick={handleRun}
                   disabled={phase !== "idle" && phase !== "done"}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  ▶ Run
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"/></svg> Run
                 </button>
                 {phase !== "idle" && (
                   <button
                     onClick={handleReset}
-                    className="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                    className="flex items-center gap-1.5 rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
                   >
-                    ↺ Reset
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M1 4s1-3 7-3a7 7 0 0 1 0 14c-3 0-5.5-1.5-6.5-3.5"/><path d="M1 1v3h3"/></svg> Reset
                   </button>
                 )}
                 <div className="ml-auto flex items-center gap-2 text-xs text-zinc-600">
@@ -255,7 +255,7 @@ export default function ToolsDemo() {
                 {toolCalls.map((tc) => {
                   const meta = TOOL_DESCRIPTIONS[tc.function.name] ?? {
                     label: tc.function.name,
-                    icon: "🔧",
+                    icon: "⚙",
                     desc: "Execute tool",
                   };
                   const isPending = pendingCalls.some((p) => p.id === tc.id);
