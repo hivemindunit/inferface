@@ -4,7 +4,6 @@
   "description": "Headless React hooks for GenAI streaming interfaces",
   "keywords": ["react", "hooks", "ai", "streaming", "genai", "llm"],
   "license": "MIT",
-  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
