@@ -78,7 +78,7 @@ function renderPlainText(text: string): React.ReactNode[] {
     parts.push(
       <code
         key={match.index}
-        className="rounded bg-zinc-800 px-1.5 py-0.5 text-sm font-mono text-emerald-300"
+        className="rounded bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 text-sm font-mono text-emerald-700 dark:text-emerald-300"
       >
         {match[1]}
       </code>
@@ -154,7 +154,7 @@ export function StreamingText({
               return (
                 <code
                   className={cn(
-                    "rounded bg-zinc-800 px-1.5 py-0.5 text-sm font-mono text-emerald-300",
+                    "rounded bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 text-sm font-mono text-emerald-700 dark:text-emerald-300",
                     classNames?.inlineCode
                   )}
                   {...props}
@@ -188,7 +188,7 @@ export function StreamingText({
             return (
               <pre
                 className={cn(
-                  "rounded-lg bg-zinc-900 p-4 overflow-x-auto my-3 text-sm",
+                  "rounded-lg bg-zinc-100 dark:bg-zinc-900 p-4 overflow-x-auto my-3 text-sm",
                   classNames?.codeBlock
                 )}
                 role="region"
@@ -232,13 +232,13 @@ export function StreamingText({
       >
         {isStreaming ? (
           // Streaming mode — lightweight render, same prose base as done mode
-          <div className={cn("prose prose-invert prose-sm max-w-none whitespace-pre-wrap break-words", classNames?.prose)}>
+          <div className={cn("prose dark:prose-invert prose-sm max-w-none whitespace-pre-wrap break-words", classNames?.prose)}>
             {markdown ? renderPlainText(content) : content}
             {cursorEl}
           </div>
         ) : (
           // Done mode — full markdown render
-          <div className={cn("prose prose-invert prose-sm max-w-none", classNames?.prose)}>
+          <div className={cn("prose dark:prose-invert prose-sm max-w-none", classNames?.prose)}>
             {markdown ? markdownContent : <div className="whitespace-pre-wrap">{content}</div>}
             {cursorEl}
           </div>

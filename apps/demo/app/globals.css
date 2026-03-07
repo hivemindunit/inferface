@@ -49,6 +49,12 @@
   }
 }
 
+/* Shiki dual-theme CSS vars */
+html.dark .shiki span { color: var(--shiki-dark) !important; }
+html:not(.dark) .shiki span { color: var(--shiki-light) !important; }
+html.dark .shiki { background-color: var(--shiki-dark-bg) !important; }
+html:not(.dark) .shiki { background-color: var(--shiki-light-bg) !important; }
+
 @layer base {
   * {
     @apply border-border;

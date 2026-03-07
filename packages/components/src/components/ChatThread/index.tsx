@@ -17,7 +17,7 @@ function getTextContent(content: ChatMessage["content"]): string {
 
 const AVATAR_COLORS: Record<string, string> = {
   user: "bg-emerald-600 text-white",
-  assistant: "bg-zinc-700 text-zinc-200",
+  assistant: "bg-muted text-muted-foreground",
   system: "bg-amber-700 text-white",
   tool: "bg-blue-700 text-white",
 };
@@ -33,7 +33,7 @@ function DefaultAvatar({
     <div
       className={cn(
         "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold select-none",
-        (AVATAR_COLORS[role] as string | undefined) ?? "bg-zinc-700 text-zinc-200",
+        (AVATAR_COLORS[role] as string | undefined) ?? "bg-muted text-muted-foreground",
         className
       )}
     >
@@ -125,13 +125,13 @@ function PencilIcon({ className }: { className?: string }) {
 function LoadingDots() {
   return (
     <span className="inline-flex gap-1" role="status" aria-label="Assistant is typing">
-      <span className="animate-bounce text-zinc-500" style={{ animationDelay: "0ms" }}>
+      <span className="animate-bounce text-muted-foreground" style={{ animationDelay: "0ms" }}>
         ·
       </span>
-      <span className="animate-bounce text-zinc-500" style={{ animationDelay: "150ms" }}>
+      <span className="animate-bounce text-muted-foreground" style={{ animationDelay: "150ms" }}>
         ·
       </span>
-      <span className="animate-bounce text-zinc-500" style={{ animationDelay: "300ms" }}>
+      <span className="animate-bounce text-muted-foreground" style={{ animationDelay: "300ms" }}>
         ·
       </span>
     </span>
@@ -241,10 +241,10 @@ export function ChatThread({
         {/* Empty state */}
         {isEmpty &&
           (slots?.emptyState ?? (
-            <div className="flex h-full items-center justify-center text-zinc-600 text-sm">
+            <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
               <div className="text-center space-y-2">
                 <svg
-                  className="mx-auto h-8 w-8 text-zinc-700"
+                  className="mx-auto h-8 w-8 text-muted-foreground/50"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -307,12 +307,12 @@ export function ChatThread({
                       }}
                       autoFocus
                       rows={3}
-                      className="w-full min-w-[240px] rounded-xl border border-emerald-500/50 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
+                      className="w-full min-w-[240px] rounded-xl border border-emerald-500/50 bg-muted px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
                     />
                     <div className="flex gap-2 justify-end">
                       <button
                         onClick={cancelEdit}
-                        className="px-3 py-1.5 text-xs rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-colors"
+                        className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
                       >
                         Cancel
                       </button>
@@ -331,7 +331,7 @@ export function ChatThread({
                       "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                       isUser
                         ? cn("bg-emerald-600 text-white", classNames?.userBubble)
-                        : cn("bg-zinc-800 text-zinc-200", classNames?.assistantBubble),
+                        : cn("bg-muted text-foreground", classNames?.assistantBubble),
                       classNames?.messageBubble
                     )}
                   >
@@ -361,7 +361,7 @@ export function ChatThread({
                     {isUser && editAndResend && (
                       <button
                         onClick={() => startEdit(msg)}
-                        className="p-1 rounded text-zinc-600 hover:text-zinc-300 transition-colors"
+                        className="p-1 rounded text-muted-foreground/60 hover:text-foreground transition-colors"
                         aria-label="Edit message"
                       >
                         <PencilIcon />
@@ -372,7 +372,7 @@ export function ChatThread({
                     {isAssistant && showCopyButton && (
                       <button
                         onClick={() => handleCopy(msg)}
-                        className="p-1 rounded text-zinc-600 hover:text-zinc-300 transition-colors"
+                        className="p-1 rounded text-muted-foreground/60 hover:text-foreground transition-colors"
                         aria-label={copiedId === msg.id ? "Copied!" : "Copy message"}
                       >
                         {copiedId === msg.id ? (
@@ -387,7 +387,7 @@ export function ChatThread({
                     {isAssistant && msg.id === lastAssistantId && handleRegenerate && (
                       <button
                         onClick={() => handleRegenerate(msg.id)}
-                        className="p-1 rounded text-zinc-600 hover:text-zinc-300 transition-colors"
+                        className="p-1 rounded text-muted-foreground/60 hover:text-foreground transition-colors"
                         aria-label="Regenerate response"
                       >
                         <RegenerateIcon />
@@ -413,7 +413,7 @@ export function ChatThread({
             )}
             <div
               className={cn(
-                "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-zinc-800 text-zinc-200",
+                "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-muted text-foreground",
                 classNames?.assistantBubble,
                 classNames?.messageBubble
               )}
@@ -436,7 +436,7 @@ export function ChatThread({
               ) : (
                 <DefaultAvatar role="assistant" className={classNames?.avatar} />
               )}
-              <div className="rounded-2xl px-4 py-2.5 bg-zinc-800">
+              <div className="rounded-2xl px-4 py-2.5 bg-muted">
                 <LoadingDots />
               </div>
             </div>

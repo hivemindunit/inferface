@@ -164,7 +164,7 @@ export function PromptInput({
 
       {/* Context slot */}
       {contextSlot && (
-        <div className="px-3 py-2 border-b border-zinc-800">{contextSlot}</div>
+        <div className="px-3 py-2 border-b border-border">{contextSlot}</div>
       )}
 
       {/* Textarea */}
@@ -179,7 +179,7 @@ export function PromptInput({
           rows={minRows}
           aria-label="Message input"
           className={cn(
-            "w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600",
+            "w-full resize-none rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60",
             "focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             classNames?.textarea
@@ -201,7 +201,7 @@ export function PromptInput({
             onChange={(e) => onModelChange?.(e.target.value)}
             aria-label="Select model"
             className={cn(
-              "rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300",
+              "rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground",
               "focus:outline-none focus:ring-1 focus:ring-emerald-500/50",
               classNames?.modelSelector
             )}
@@ -219,7 +219,7 @@ export function PromptInput({
           <span
             className={cn(
               "text-xs tabular-nums",
-              isOverThreshold ? "text-red-400" : "text-zinc-600",
+              isOverThreshold ? "text-destructive" : "text-muted-foreground/60",
               classNames?.tokenCount
             )}
             aria-live="polite"
@@ -241,7 +241,7 @@ export function PromptInput({
             onClick={onStop}
             aria-label="Stop generating"
             className={cn(
-              "flex items-center gap-1.5 rounded-xl bg-red-900/50 border border-red-800 px-4 py-2 text-sm text-red-300 hover:bg-red-900 transition-colors",
+              "flex items-center gap-1.5 rounded-xl bg-destructive/10 border border-destructive/30 px-4 py-2 text-sm text-destructive hover:bg-destructive/20 transition-colors",
               classNames?.stopButton
             )}
           >

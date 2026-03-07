@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CodeSnippet } from "./components/code-snippet";
 
 const DEMO_CARDS = [
   {
@@ -89,16 +90,16 @@ export default function Home() {
       {/* Zero Dependencies Callout */}
       <section className="px-6 pb-20">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-3 rounded-2xl border border-emerald-800/50 bg-emerald-950/20 dark:bg-emerald-950/30 px-8 py-5">
-            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-emerald-600/20 text-emerald-500 dark:text-emerald-400">
+          <div className="inline-flex items-center gap-3 rounded-2xl border border-emerald-700/50 dark:border-emerald-800/50 bg-emerald-700/10 dark:bg-emerald-950/30 px-8 py-5">
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-emerald-600/20 text-emerald-700 dark:text-emerald-400">
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="text-left">
-              <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Zero runtime dependencies</div>
+              <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Zero runtime dependencies</div>
               <div className="text-xs text-muted-foreground">
-                <code className="text-emerald-500 dark:text-emerald-400/70">@inferface/hooks</code> — &lt;10KB gzipped. No transitive deps. Just React.
+                <code className="text-emerald-700 dark:text-emerald-400/70">@inferface/hooks</code> — &lt;10KB gzipped. No transitive deps. Just React.
               </div>
             </div>
           </div>
@@ -116,15 +117,15 @@ export default function Home() {
                 href={card.href}
                 className="group flex flex-col rounded-2xl border border-border bg-card/50 p-6 hover:border-foreground/20 hover:bg-card transition-all"
               >
-                <div className="text-xs font-mono text-emerald-500 dark:text-emerald-400 mb-2">{card.hook}</div>
+                <div className="text-xs font-mono text-emerald-700 dark:text-emerald-400 mb-2">{card.hook}</div>
                 <h3 className="text-lg font-semibold text-foreground">
                   {card.title}
                   <span className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">&rarr;</span>
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground flex-1">{card.description}</p>
-                <pre className="mt-4 rounded-lg bg-muted border border-border p-3 text-[11px] leading-relaxed overflow-hidden">
-                  <code className="text-emerald-500 dark:text-emerald-300/80">{card.code}</code>
-                </pre>
+                <div className="mt-4 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+                  <CodeSnippet code={card.code} lang="tsx" className="text-[11px] leading-relaxed" />
+                </div>
               </Link>
             ))}
           </div>
@@ -148,7 +149,7 @@ export default function Home() {
                 {HOOKS_TABLE.map((hook) => (
                   <tr key={hook.name} className="border-b border-border/50 last:border-0">
                     <td className="px-6 py-3">
-                      <code className="text-emerald-500 dark:text-emerald-400 text-xs font-mono">{hook.name}</code>
+                      <code className="text-emerald-700 dark:text-emerald-400 text-xs font-mono">{hook.name}</code>
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">{hook.description}</td>
                     <td className="px-6 py-3">

@@ -3,6 +3,7 @@
 import { useStream, useToolCalls } from "@inferface/hooks";
 import { StreamingText } from "@inferface/components";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { CodeSnippet } from "../../components/code-snippet";
 
 const CODE_SNIPPET = `const { content, start, isStreaming } = useStream({
   api: "/api/tools",
@@ -176,14 +177,14 @@ export default function ToolsDemo() {
   const displayContent = initialContent.split("[TOOL_CALLS]")[0] || initialStream.content.split("[TOOL_CALLS]")[0];
 
   return (
-    <main className="h-screen overflow-hidden flex flex-col bg-zinc-950 text-zinc-100">
+    <main className="h-screen overflow-hidden flex flex-col bg-background text-foreground">
       {/* Header */}
       <div className="shrink-0 px-6 pt-20 pb-4 max-w-6xl w-full mx-auto">
         <h1 className="text-3xl font-bold tracking-tight">
           Tool Calls with UI Confirmation
         </h1>
-        <p className="mt-1 text-zinc-400">
-          <code className="text-emerald-400">useToolCalls</code> — human-in-the-loop
+        <p className="mt-1 text-muted-foreground">
+          <code className="text-emerald-700 dark:text-emerald-400">useToolCalls</code> — human-in-the-loop
           approval for AI tool execution.
         </p>
       </div>
@@ -195,9 +196,9 @@ export default function ToolsDemo() {
           <div className="flex flex-col h-full min-h-0">
             {/* Prompt + buttons — fixed */}
             <div className="shrink-0 space-y-3 mb-3">
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-                <div className="text-xs text-zinc-500 mb-2">Prompt</div>
-                <div className="text-sm text-zinc-200">
+              <div className="rounded-xl border border-border bg-card/50 p-4">
+                <div className="text-xs text-muted-foreground mb-2">Prompt</div>
+                <div className="text-sm text-foreground">
                   &quot;Plan a trip from Toronto to Paris in June&quot;
                 </div>
               </div>
@@ -212,14 +213,14 @@ export default function ToolsDemo() {
                 {phase !== "idle" && (
                   <button
                     onClick={handleReset}
-                    className="flex items-center gap-1.5 rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                    className="flex items-center gap-1.5 rounded-lg bg-muted px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M1 4s1-3 7-3a7 7 0 0 1 0 14c-3 0-5.5-1.5-6.5-3.5"/><path d="M1 1v3h3"/></svg> Reset
                   </button>
                 )}
-                <div className="ml-auto flex items-center gap-2 text-xs text-zinc-600">
+                <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground/70">
                   <span className={`inline-block h-2 w-2 rounded-full ${
-                    phase === "idle" || phase === "done" ? "bg-zinc-700"
+                    phase === "idle" || phase === "done" ? "bg-muted-foreground/30"
                     : phase === "awaiting_tools" ? "bg-amber-400 animate-pulse"
                     : "bg-emerald-400 animate-pulse"
                   }`} />
@@ -237,11 +238,11 @@ export default function ToolsDemo() {
 
             {/* Initial AI response */}
             {displayContent && (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+              <div className="rounded-xl border border-border bg-card/50 p-4">
                 <StreamingText
                   content={displayContent}
                   isStreaming={phase === "streaming"}
-                  className="text-sm text-zinc-200"
+                  className="text-sm text-foreground"
                 />
               </div>
             )}
@@ -277,14 +278,14 @@ export default function ToolsDemo() {
                           ? "border-emerald-700/50 bg-emerald-950/20"
                           : isDenied
                           ? "border-red-700/50 bg-red-950/20"
-                          : "border-zinc-800 bg-zinc-900/50"
+                          : "border-border bg-card/50"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{meta.icon}</span>
                           <div>
-                            <div className="text-sm font-medium text-zinc-200">
+                            <div className="text-sm font-medium text-foreground">
                               {isPending
                                 ? `The AI wants to: ${meta.label}`
                                 : isApproved
@@ -293,7 +294,7 @@ export default function ToolsDemo() {
                                 ? `${meta.label} — Denied ✗`
                                 : meta.label}
                             </div>
-                            <div className="text-xs text-zinc-500">
+                            <div className="text-xs text-muted-foreground">
                               {Object.entries(args)
                                 .map(([k, v]) => `${k}: ${v}`)
                                 .join(", ")}
@@ -311,7 +312,7 @@ export default function ToolsDemo() {
                             </button>
                             <button
                               onClick={() => handleDeny(tc.id)}
-                              className="rounded-lg border border-red-800 bg-red-900/30 px-3 py-1.5 text-xs text-red-300 hover:bg-red-900/50 transition-colors"
+                              className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/20 transition-colors"
                             >
                               Deny
                             </button>
@@ -326,11 +327,11 @@ export default function ToolsDemo() {
 
             {/* Final AI response */}
             {(finalStream.content || finalContent) && (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+              <div className="rounded-xl border border-border bg-card/50 p-4">
                 <StreamingText
                   content={finalStream.content || finalContent}
                   isStreaming={phase === "streaming_final"}
-                  className="text-sm text-zinc-200"
+                  className="text-sm text-foreground"
                 />
               </div>
             )}
@@ -339,19 +340,17 @@ export default function ToolsDemo() {
 
           {/* Right: Code snippet — scrollable */}
           <div className="flex flex-col h-full overflow-y-auto space-y-4 pr-1">
-            <div className="text-sm font-medium text-zinc-400">The code:</div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-              <pre className="text-sm leading-relaxed overflow-x-auto">
-                <code className="text-emerald-300">{CODE_SNIPPET}</code>
-              </pre>
+            <div className="text-sm font-medium text-muted-foreground">The code:</div>
+            <div className="rounded-xl border border-border bg-card p-6">
+              <CodeSnippet code={CODE_SNIPPET} lang="tsx" />
             </div>
-            <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 text-sm text-zinc-500 space-y-3">
+            <div className="rounded-xl border border-border/50 bg-card/30 p-4 text-sm text-muted-foreground space-y-3">
               <p>
-                <strong className="text-zinc-400">Human-in-the-loop.</strong>{" "}
-                <code className="text-emerald-400/70">useToolCalls</code> parses
+                <strong className="text-foreground">Human-in-the-loop.</strong>{" "}
+                <code className="text-emerald-700 dark:text-emerald-400/70">useToolCalls</code> parses
                 tool calls from the stream and gives you{" "}
-                <code className="text-emerald-400/70">resolveToolCall</code> /{" "}
-                <code className="text-emerald-400/70">rejectToolCall</code> for
+                <code className="text-emerald-700 dark:text-emerald-400/70">resolveToolCall</code> /{" "}
+                <code className="text-emerald-700 dark:text-emerald-400/70">rejectToolCall</code> for
                 UI-confirmed execution.
               </p>
               <p>
@@ -360,7 +359,7 @@ export default function ToolsDemo() {
                 generates a final response.
               </p>
               <p>
-                <strong className="text-zinc-400">
+                <strong className="text-foreground">
                   Real production pattern.
                 </strong>{" "}
                 Build agentic approval workflows, human-verified tool use, or
@@ -378,13 +377,13 @@ export default function ToolsDemo() {
               ].map((feat) => (
                 <div
                   key={feat.label}
-                  className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3"
+                  className="rounded-lg border border-border/50 bg-card/30 p-3"
                 >
                   <div className="text-lg">{feat.icon}</div>
-                  <div className="mt-1 text-xs font-medium text-zinc-300">
+                  <div className="mt-1 text-xs font-medium text-foreground">
                     {feat.label}
                   </div>
-                  <div className="text-xs text-zinc-600">{feat.desc}</div>
+                  <div className="text-xs text-muted-foreground/70">{feat.desc}</div>
                 </div>
               ))}
             </div>
