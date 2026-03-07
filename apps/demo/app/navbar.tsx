@@ -39,17 +39,12 @@ function MoonIcon({ className }: { className?: string }) {
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return <div className="h-8 w-8" />;
-  }
-
+  if (!mounted) return <div className="h-8 w-8" />;
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200 transition-colors"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
     >
       {theme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
@@ -65,34 +60,28 @@ const NAV_LINKS = [
 
 export function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 dark:bg-zinc-950/80 bg-white/80 backdrop-blur-md">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        {/* Left: Wordmark */}
-        <Link
-          href="/"
-          className="text-lg font-bold tracking-tight text-zinc-100 dark:text-zinc-100 text-zinc-900 hover:text-white dark:hover:text-white transition-colors"
-        >
+        <Link href="/" className="text-lg font-bold tracking-tight text-foreground hover:text-foreground/80 transition-colors">
           inferface
         </Link>
-
-        {/* Right: Links */}
         <div className="flex items-center gap-1">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-lg px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200 transition-colors"
+              className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {link.label}
             </Link>
           ))}
-          <div className="mx-1 h-4 w-px bg-zinc-800" />
+          <div className="mx-1 h-4 w-px bg-border" />
           <ThemeToggle />
           <a
             href="https://github.com/hivemindunit/inferface"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
             aria-label="GitHub"
           >
             <GitHubIcon className="h-4 w-4" />
