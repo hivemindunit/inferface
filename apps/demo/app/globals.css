@@ -73,10 +73,10 @@ html.dark .prose pre.shiki {
     @apply bg-background text-foreground;
   }
 
-  /* Custom scrollbar — matches zinc dark theme */
+  /* Custom scrollbar — subtle, low contrast */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #3f3f46 transparent; /* zinc-700 thumb, transparent track */
+    scrollbar-color: rgba(120, 120, 128, 0.25) transparent;
   }
   *::-webkit-scrollbar {
     width: 6px;
@@ -86,10 +86,10 @@ html.dark .prose pre.shiki {
     background: transparent;
   }
   *::-webkit-scrollbar-thumb {
-    background-color: #3f3f46; /* zinc-700 */
+    background-color: rgba(120, 120, 128, 0.25);
     border-radius: 9999px;
   }
   *::-webkit-scrollbar-thumb:hover {
-    background-color: #52525b; /* zinc-600 */
+    background-color: rgba(120, 120, 128, 0.45);
   }
 }
