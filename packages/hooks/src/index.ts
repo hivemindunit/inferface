@@ -1,12 +1,22 @@
-// @inferface/hooks — Core engine for AI-app UI
-// Exports all hooks
+// Public API for @inferface/hooks
+// ---------------------------------------------------------------------------
 
-export { useStream } from './useStream'
-export { useChat } from './useChat'
-export { useCompletion } from './useCompletion'
-export { useToolCalls } from './useToolCalls'
+// Types
+export type {
+  StreamTransport,
+  MessageRole,
+  ChartData,
+  ContentPart,
+  Message,
+  ToolCall,
+  ToolResult,
+  ProviderFormat,
+} from "./types/core";
 
-export type { UseStreamOptions, UseStreamReturn } from './useStream'
-export type { UseChatOptions, UseChatReturn, Message, Role } from './useChat'
-export type { UseCompletionOptions, UseCompletionReturn } from './useCompletion'
-export type { ToolCall, ToolResult, UseToolCallsReturn } from './useToolCalls'
+// Utilities
+export { extractText } from "./types/core";
+export { parseSSEStream, parseOpenAIChunk, parseAnthropicChunk } from "./utils/parseSSE";
+
+// Hooks
+export { useStream } from "./hooks/useStream";
+export type { UseStreamOptions, UseStreamReturn } from "./hooks/useStream";

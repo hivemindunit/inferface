@@ -1,0 +1,74 @@
+// Core types for @inferface/hooks
+// ---------------------------------------------------------------------------
+
+export type StreamTransport = (
+  input: RequestInfo | URL,
+  init?: RequestInit
+) => Promise<Response>;
+
+export type MessageRole = "user" | "assistant" | "system" | "tool";
+
+// ---------------------------------------------------------------------------
+// Rich Content / Content Parts
+// ---------------------------------------------------------------------------
+
+/** Data shape for an embedded chart */
+export interface ChartData {
+  type: "bar" | "line" | "pie" | "scatter" | string;
+  labels?: string[];
+  datasets: {
+    label?: string;
+    data: number[];
+    [key: string]: unknown;
+  }[];
+  options?: Record<string, unknown>;
+}
+
+export type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string; alt?: string } }
+  | { type: "chart"; data: ChartData }
+  | { type: "custom"; component: string; props: unknown };
+
+export interface Message {
+  id: string;
+  role: MessageRole;
+  /**
+   * String for plain-text messages; ContentPart[] for rich/multimodal content.
+   * Hooks always return string during streaming accumulation.
+   * Use `extractText(content)` to get a plain string in either case.
+   */
+  content: string | ContentPart[];
+  createdAt?: Date;
+  toolCallId?: string;
+  toolCalls?: ToolCall[];
+}
+
+export interface ToolCall {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string; // JSON string — stream accumulates this
+  };
+}
+
+export interface ToolResult {
+  toolCallId: string;
+  result: unknown;
+  error?: Error;
+}
+
+export type ProviderFormat = "openai" | "anthropic" | "custom";
+
+/**
+ * Extract a plain text string from Message.content regardless of form.
+ * Concatenates all `text` parts for ContentPart[] content.
+ */
+export function extractText(content: string | ContentPart[]): string {
+  if (typeof content === "string") return content;
+  return content
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
