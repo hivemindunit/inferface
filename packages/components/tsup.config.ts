@@ -7,7 +7,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-  external: ["react", "react-dom"],
+  external: ["react", "react-dom", "react-markdown", "remark-gfm", "shiki"],
   esbuildOptions(options) {
     options.banner = {
       js: '"use client";',

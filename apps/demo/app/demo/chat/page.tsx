@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@inferface/hooks";
+import { StreamingText } from "@inferface/components";
 import { useRef, useEffect, useState } from "react";
 
 const CODE_SNIPPET = `const { messages, send, isLoading, abort } = useChat({
@@ -174,31 +175,47 @@ export default function ChatDemo() {
                             : "bg-zinc-800 text-zinc-200"
                         }`}
                       >
-                        <pre className="whitespace-pre-wrap font-sans">
-                          {typeof msg.content === "string"
-                            ? msg.content
-                            : msg.content
-                                .filter(
-                                  (p): p is { type: "text"; text: string } =>
-                                    p.type === "text"
-                                )
-                                .map((p) => p.text)
-                                .join("")}
-                        </pre>
+                        {msg.role === "assistant" ? (
+                          <StreamingText
+                            content={
+                              typeof msg.content === "string"
+                                ? msg.content
+                                : msg.content
+                                    .filter(
+                                      (p): p is { type: "text"; text: string } =>
+                                        p.type === "text"
+                                    )
+                                    .map((p) => p.text)
+                                    .join("")
+                            }
+                            isStreaming={false}
+                          />
+                        ) : (
+                          <pre className="whitespace-pre-wrap font-sans">
+                            {typeof msg.content === "string"
+                              ? msg.content
+                              : msg.content
+                                  .filter(
+                                    (p): p is { type: "text"; text: string } =>
+                                      p.type === "text"
+                                  )
+                                  .map((p) => p.text)
+                                  .join("")}
+                          </pre>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
               ))}
 
-              {/* Streaming content (in-flight assistant message) */}
               {streamingContent && (
                 <div className="flex justify-start">
                   <div className="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-zinc-800 text-zinc-200">
-                    <pre className="whitespace-pre-wrap font-sans">
-                      {streamingContent}
-                      <span className="inline-block w-2 h-4 ml-0.5 bg-emerald-400 animate-pulse rounded-sm" />
-                    </pre>
+                    <StreamingText
+                      content={streamingContent}
+                      isStreaming={true}
+                    />
                   </div>
                 </div>
               )}
