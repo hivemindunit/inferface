@@ -231,8 +231,8 @@ export function StreamingText({
         aria-atomic={isStreaming ? "false" : "true"}
       >
         {isStreaming ? (
-          // Streaming mode — lightweight render
-          <div className={cn("whitespace-pre-wrap break-words", classNames?.prose)}>
+          // Streaming mode — lightweight render, same prose base as done mode
+          <div className={cn("prose prose-invert prose-sm max-w-none whitespace-pre-wrap break-words", classNames?.prose)}>
             {markdown ? renderPlainText(content) : content}
             {cursorEl}
           </div>
