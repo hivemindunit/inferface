@@ -1,11 +1,5 @@
-// @inferface/components — GenAI UI primitives
-// Exports all components
+// Public API for @inferface/components
+// ---------------------------------------------------------------------------
 
-export { ChatThread } from './ChatThread'
-export { StreamingText } from './StreamingText'
-export { PromptInput } from './PromptInput'
-export { ToolCallCard } from './ToolCallCard'
-export { ThinkingIndicator } from './ThinkingIndicator'
-export { RAGSourceList } from './RAGSourceList'
-export { AgentStepTrace } from './AgentStepTrace'
-export { TokenUsageBadge } from './TokenUsageBadge'
+// Re-export cn utility for downstream consumers
+export { cn } from "./lib/utils";
