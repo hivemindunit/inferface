@@ -41,6 +41,9 @@ export interface UseToolCallsReturn {
 
   /** Reject a tool call with an error */
   rejectToolCall: (toolCallId: string, error: Error) => void;
+
+  /** Reset all state — call before starting a new run */
+  reset: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -244,6 +247,14 @@ export function useToolCalls(options: UseToolCallsOptions): UseToolCallsReturn {
     });
   }, []);
 
+  const reset = useCallback(() => {
+    setToolCalls([]);
+    setPendingIds(new Set());
+    setResults(new Map());
+    depthRef.current = 0;
+    processedIdsRef.current = new Set();
+  }, []);
+
   // Derive pendingCalls from toolCalls + pendingIds
   const pendingCalls = toolCalls.filter((tc) => pendingIds.has(tc.id));
   const isExecuting = pendingIds.size > 0;
@@ -255,5 +266,6 @@ export function useToolCalls(options: UseToolCallsOptions): UseToolCallsReturn {
     isExecuting,
     resolveToolCall,
     rejectToolCall,
+    reset,
   };
 }

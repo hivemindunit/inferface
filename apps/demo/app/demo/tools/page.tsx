@@ -2,7 +2,7 @@
 
 import { useStream, useToolCalls } from "@inferface/hooks";
 import { StreamingText } from "@inferface/components";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 const CODE_SNIPPET = `const { content, start, isStreaming } = useStream({
   api: "/api/tools",
@@ -74,7 +74,7 @@ export default function ToolsDemo() {
   });
 
   // Tool calls parser
-  const { toolCalls, pendingCalls, resolveToolCall, rejectToolCall, isExecuting, results } =
+  const { toolCalls, pendingCalls, resolveToolCall, rejectToolCall, isExecuting, results, reset: resetToolCalls } =
     useToolCalls({
       stream: initialStream.content,
       providerFormat: "openai",
@@ -90,13 +90,25 @@ export default function ToolsDemo() {
     },
   });
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll as content arrives
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [initialStream.content, finalStream.content, toolCalls.length]);
+
   const handleRun = useCallback(async () => {
     setPhase("streaming");
     setInitialContent("");
     setFinalContent("");
     setResolvedTools({});
+    initialStream.reset();
+    finalStream.reset();
+    resetToolCalls();
     await initialStream.start({ phase: "initial" });
-  }, [initialStream]);
+  }, [initialStream, finalStream, resetToolCalls]);
 
   const handleApprove = useCallback(
     (toolCallId: string, functionName: string) => {
@@ -157,60 +169,74 @@ export default function ToolsDemo() {
     setResolvedTools({});
     initialStream.reset();
     finalStream.reset();
-  }, [initialStream, finalStream]);
+    resetToolCalls();
+  }, [initialStream, finalStream, resetToolCalls]);
 
   // Extract text before [TOOL_CALLS] marker for display
   const displayContent = initialContent.split("[TOOL_CALLS]")[0] || initialStream.content.split("[TOOL_CALLS]")[0];
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <a
-            href="/"
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            ← inferface
-          </a>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            Tool Calls with UI Confirmation
-          </h1>
-          <p className="mt-2 text-zinc-400">
-            <code className="text-emerald-400">useToolCalls</code> — human-in-the-loop
-            approval for AI tool execution.
-          </p>
-        </div>
+    <main className="h-screen overflow-hidden flex flex-col bg-zinc-950 text-zinc-100">
+      {/* Header */}
+      <div className="shrink-0 px-6 pt-8 pb-4 max-w-6xl w-full mx-auto">
+        <a href="/" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          ← inferface
+        </a>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          Tool Calls with UI Confirmation
+        </h1>
+        <p className="mt-1 text-zinc-400">
+          <code className="text-emerald-400">useToolCalls</code> — human-in-the-loop
+          approval for AI tool execution.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left: Interactive demo */}
-          <div className="space-y-4">
-            {/* Prompt */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-              <div className="text-xs text-zinc-500 mb-2">Prompt</div>
-              <div className="text-sm text-zinc-200">
-                &quot;Plan a trip from Toronto to Paris in June&quot;
+      {/* Body */}
+      <div className="flex-1 min-h-0 px-6 pb-6 max-w-6xl w-full mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+          {/* Left: Interactive demo — scrollable */}
+          <div className="flex flex-col h-full min-h-0">
+            {/* Prompt + buttons — fixed */}
+            <div className="shrink-0 space-y-3 mb-3">
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+                <div className="text-xs text-zinc-500 mb-2">Prompt</div>
+                <div className="text-sm text-zinc-200">
+                  &quot;Plan a trip from Toronto to Paris in June&quot;
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleRun}
+                  disabled={phase !== "idle" && phase !== "done"}
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ▶ Run
+                </button>
+                {phase !== "idle" && (
+                  <button
+                    onClick={handleReset}
+                    className="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                  >
+                    ↺ Reset
+                  </button>
+                )}
+                <div className="ml-auto flex items-center gap-2 text-xs text-zinc-600">
+                  <span className={`inline-block h-2 w-2 rounded-full ${
+                    phase === "idle" || phase === "done" ? "bg-zinc-700"
+                    : phase === "awaiting_tools" ? "bg-amber-400 animate-pulse"
+                    : "bg-emerald-400 animate-pulse"
+                  }`} />
+                  {phase === "idle" && "Ready"}
+                  {phase === "streaming" && "Streaming..."}
+                  {phase === "awaiting_tools" && "Awaiting approval..."}
+                  {phase === "streaming_final" && "Generating response..."}
+                  {phase === "done" && "Complete"}
+                </div>
               </div>
             </div>
 
-            {/* Run button */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleRun}
-                disabled={phase !== "idle" && phase !== "done"}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                ▶ Run
-              </button>
-              {phase !== "idle" && (
-                <button
-                  onClick={handleReset}
-                  className="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-                >
-                  ↺ Reset
-                </button>
-              )}
-            </div>
+            {/* Scrollable output area */}
+            <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
 
             {/* Initial AI response */}
             {displayContent && (
@@ -311,28 +337,11 @@ export default function ToolsDemo() {
                 />
               </div>
             )}
+            </div>{/* end scrollable area */}
+          </div>{/* end left column */}
 
-            {/* Status */}
-            <div className="flex items-center gap-2 text-xs text-zinc-600">
-              <span
-                className={`inline-block h-2 w-2 rounded-full ${
-                  phase === "idle" || phase === "done"
-                    ? "bg-zinc-700"
-                    : phase === "awaiting_tools"
-                    ? "bg-amber-400 animate-pulse"
-                    : "bg-emerald-400 animate-pulse"
-                }`}
-              />
-              {phase === "idle" && "Ready"}
-              {phase === "streaming" && "Streaming..."}
-              {phase === "awaiting_tools" && "Awaiting tool approval..."}
-              {phase === "streaming_final" && "Generating response..."}
-              {phase === "done" && "Complete"}
-            </div>
-          </div>
-
-          {/* Right: Code snippet */}
-          <div className="space-y-4">
+          {/* Right: Code snippet — scrollable */}
+          <div className="flex flex-col h-full overflow-y-auto space-y-4 pr-1">
             <div className="text-sm font-medium text-zinc-400">The code:</div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
               <pre className="text-sm leading-relaxed overflow-x-auto">
@@ -382,9 +391,9 @@ export default function ToolsDemo() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </div>
+          </div>{/* end right column */}
+        </div>{/* end grid */}
+      </div>{/* end body */}
     </main>
   );
 }
