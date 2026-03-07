@@ -179,7 +179,7 @@ export function PromptInput({
           rows={minRows}
           aria-label="Message input"
           className={cn(
-            "w-full resize-none rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60",
+            "w-full resize-none overflow-hidden rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60",
             "focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             classNames?.textarea
