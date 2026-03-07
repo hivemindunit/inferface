@@ -20,3 +20,6 @@ export { parseSSEStream, parseOpenAIChunk, parseAnthropicChunk } from "./utils/p
 // Hooks
 export { useStream } from "./hooks/useStream";
 export type { UseStreamOptions, UseStreamReturn } from "./hooks/useStream";
+
+export { useCompletion } from "./hooks/useCompletion";
+export type { UseCompletionOptions, UseCompletionReturn } from "./hooks/useCompletion";
