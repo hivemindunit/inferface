@@ -1,6 +1,38 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Build outputs
 dist/
+.next/
+out/
+build/
+
+# Coverage
+coverage/
+
+# Turbo
 .turbo/
+
+# Environment
 .env
 .env.local
+.env.production
+.env*.local
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+npm-debug.log*
+pnpm-debug.log*
+
+# TypeScript
 *.tsbuildinfo
