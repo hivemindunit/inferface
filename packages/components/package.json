@@ -2,7 +2,13 @@
   "name": "@inferface/components",
   "version": "0.0.1",
   "description": "React UI components for GenAI streaming interfaces",
-  "keywords": ["react", "components", "ai", "chat", "ui"],
+  "keywords": [
+    "react",
+    "components",
+    "ai",
+    "chat",
+    "ui"
+  ],
   "license": "MIT",
   "exports": {
     ".": {
@@ -19,7 +25,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
@@ -36,6 +44,9 @@
   "dependencies": {
     "@inferface/hooks": "workspace:*",
     "clsx": "^2.x",
+    "react-markdown": "^9.1.0",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^1.29.2",
     "tailwind-merge": "^2.x"
   },
   "devDependencies": {

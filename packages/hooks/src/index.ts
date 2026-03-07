@@ -26,3 +26,6 @@ export type { UseCompletionOptions, UseCompletionReturn } from "./hooks/useCompl
 
 export { useChat } from "./hooks/useChat";
 export type { UseChatOptions, UseChatReturn } from "./hooks/useChat";
+
+export { useToolCalls } from "./hooks/useToolCalls";
+export type { UseToolCallsOptions, UseToolCallsReturn } from "./hooks/useToolCalls";

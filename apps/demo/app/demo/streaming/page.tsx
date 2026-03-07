@@ -1,6 +1,7 @@
 "use client";
 
 import { useCompletion } from "@inferface/hooks";
+import { StreamingText } from "@inferface/components";
 
 const EXAMPLE_PROMPTS = [
   "Explain async/await with code examples",
@@ -92,14 +93,11 @@ export default function StreamingDemo() {
                   Error: {error.message}
                 </div>
               ) : completion ? (
-                <div className="prose prose-invert prose-sm max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-200 font-sans">
-                    {completion}
-                    {isLoading && (
-                      <span className="inline-block w-2 h-4 ml-0.5 bg-emerald-400 animate-pulse" />
-                    )}
-                  </pre>
-                </div>
+                <StreamingText
+                  content={completion}
+                  isStreaming={isLoading}
+                  className="text-sm leading-relaxed text-zinc-200"
+                />
               ) : (
                 <div className="flex h-full items-center justify-center text-zinc-600 text-sm">
                   Click a prompt above to see streaming in action
