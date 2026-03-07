@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { motion, useInView } from "framer-motion";
 import { CodeSnippet } from "./components/code-snippet";
+
+const MotionLink = motion(Link);
 
 /* ─── Data ───────────────────────────────────────────────────────────── */
 
@@ -287,6 +290,12 @@ function CopyInstallButton() {
 
 export default function Home() {
   const [stars, setStars] = useState<number | null>(null);
+  const cardsRef = useRef(null);
+  const cardsInView = useInView(cardsRef, { once: true, margin: "-80px" });
+  const edgeCasesRef = useRef(null);
+  const edgeCasesInView = useInView(edgeCasesRef, { once: true, margin: "-80px" });
+  const hitlRef = useRef(null);
+  const hitlInView = useInView(hitlRef, { once: true, margin: "-80px" });
 
   useEffect(() => {
     fetch("https://api.github.com/repos/hivemindunit/inferface")
@@ -301,7 +310,11 @@ export default function Home() {
       <section className="px-6 pt-28 pb-20">
         <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left column */}
-          <div className="animate-fade-in-up">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+          >
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-mono text-emerald-600 dark:text-emerald-400 mb-6">
               <svg className="h-3 w-3" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
                 <path d="M6 0l1.76 3.57L12 4.16 8.82 7.07l.94 4.93L6 9.94 2.24 12l.94-4.93L0 4.16l4.24-.59z" />
@@ -334,12 +347,17 @@ export default function Home() {
                 </span>
               </a>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right column — animated chat preview */}
-          <div className="flex justify-center lg:justify-end animate-fade-in-up-delayed">
+          <motion.div
+            className="flex justify-center lg:justify-end"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+          >
             <StreamingPreview />
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -356,36 +374,44 @@ export default function Home() {
           <h2 className="text-2xl font-bold tracking-tight text-center mb-12">
             Explore the primitives
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {DEMO_CARDS.map((card) => (
-              <Link
+          <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {DEMO_CARDS.map((card, index) => (
+              <motion.div
                 key={card.href}
-                href={card.href}
-                className="group flex flex-col rounded-2xl glow-card bg-card/50 p-6 hover:scale-[1.015] transition-transform"
+                initial={{ opacity: 0, y: 20 }}
+                animate={cardsInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <div className="text-xs font-mono text-emerald-700 dark:text-emerald-400 mb-2">
-                  {card.hook}
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  {card.title}
-                  <span
-                    className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-hidden="true"
-                  >
-                    &rarr;
-                  </span>
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground flex-1">
-                  {card.description}
-                </p>
-                <div className="mt-4 rounded-lg bg-muted border border-border p-3 overflow-hidden">
-                  <CodeSnippet
-                    code={card.code}
-                    lang="tsx"
-                    className="text-[11px] leading-relaxed"
-                  />
-                </div>
-              </Link>
+                <MotionLink
+                  href={card.href}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="group flex flex-col rounded-2xl glow-card bg-card/50 p-6 h-full"
+                >
+                  <div className="text-xs font-mono text-emerald-700 dark:text-emerald-400 mb-2">
+                    {card.hook}
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {card.title}
+                    <span
+                      className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-hidden="true"
+                    >
+                      &rarr;
+                    </span>
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground flex-1">
+                    {card.description}
+                  </p>
+                  <div className="mt-4 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+                    <CodeSnippet
+                      code={card.code}
+                      lang="tsx"
+                      className="text-[11px] leading-relaxed"
+                    />
+                  </div>
+                </MotionLink>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -403,9 +429,14 @@ export default function Home() {
               asks for permission.
             </p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div ref={hitlRef} className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Left — description */}
-            <div className="space-y-4">
+            <motion.div
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={hitlInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.5 }}
+            >
               <ul className="space-y-4 text-sm text-muted-foreground">
                 <li className="flex gap-3">
                   <span className="shrink-0 mt-1 text-emerald-500">
@@ -433,9 +464,14 @@ export default function Home() {
                   Nested tool calls and dependency chains handled automatically
                 </li>
               </ul>
-            </div>
+            </motion.div>
 
             {/* Right — mock approval card */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={hitlInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
             <div className="rounded-xl border bg-card p-4 max-w-sm">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 text-sm font-mono text-foreground">
@@ -460,6 +496,7 @@ export default function Home() {
                 </span>
               </div>
             </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -470,10 +507,13 @@ export default function Home() {
           <h2 className="text-2xl font-bold tracking-tight text-center mb-12">
             Built for when things get weird
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {EDGE_CASES.map((card) => (
-              <div
+          <div ref={edgeCasesRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {EDGE_CASES.map((card, index) => (
+              <motion.div
                 key={card.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={edgeCasesInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="rounded-xl glow-card bg-card/50 p-5"
               >
                 <div className="text-emerald-600 dark:text-emerald-400 mb-3">
@@ -485,7 +525,7 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">
                   {card.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
