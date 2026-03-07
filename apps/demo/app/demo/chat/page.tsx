@@ -53,29 +53,30 @@ export default function ChatDemo() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <a
-            href="/"
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            ← inferface
-          </a>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            Chat Interface
-          </h1>
-          <p className="mt-2 text-zinc-400">
-            A full ChatGPT-style interface powered by{" "}
-            <code className="text-emerald-400">useChat</code> — in ~20 lines of
-            code.
-          </p>
-        </div>
+    <main className="h-screen overflow-hidden flex flex-col bg-zinc-950 text-zinc-100">
+      {/* Header */}
+      <div className="shrink-0 px-6 pt-8 pb-4 max-w-6xl w-full mx-auto">
+        <a
+          href="/"
+          className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          ← inferface
+        </a>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          Chat Interface
+        </h1>
+        <p className="mt-1 text-zinc-400">
+          A full ChatGPT-style interface powered by{" "}
+          <code className="text-emerald-400">useChat</code> — in ~20 lines of
+          code.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left: Live chat */}
-          <div className="flex flex-col h-[600px] rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+      {/* Body — fills remaining height */}
+      <div className="flex-1 min-h-0 px-6 pb-6 max-w-6xl w-full mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+          {/* Left: Live chat — fills full height */}
+          <div className="flex flex-col h-full rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden min-h-0">
             {/* Messages */}
             <div
               ref={scrollRef}
@@ -195,8 +196,8 @@ export default function ChatDemo() {
             </div>
           </div>
 
-          {/* Right: Code snippet */}
-          <div className="space-y-4">
+          {/* Right: Code snippet — scrollable if content overflows */}
+          <div className="flex flex-col h-full overflow-y-auto space-y-4 pr-1">
             <div className="text-sm font-medium text-zinc-400">
               The code powering this:
             </div>
