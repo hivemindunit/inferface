@@ -52,10 +52,10 @@
 /* Shiki dual-theme CSS vars */
 html.dark .shiki span { color: var(--shiki-dark) !important; }
 html:not(.dark) .shiki span { color: var(--shiki-light) !important; }
-html.dark .shiki { background-color: var(--shiki-dark-bg) !important; }
-html:not(.dark) .shiki { background-color: var(--shiki-light-bg) !important; }
+/* Transparent by default — containers provide their own background */
+.shiki { background-color: transparent !important; }
 
-/* Code blocks inside prose (chat messages) — match the message bubble bg, not shiki's white */
+/* Code blocks inside prose (chat messages) — subtle muted bg to differentiate from bubble */
 .prose .inferface-code-block .shiki,
 .prose pre.shiki {
   background-color: hsl(var(--muted) / 0.6) !important;
