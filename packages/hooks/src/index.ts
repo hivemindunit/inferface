@@ -23,3 +23,6 @@ export type { UseStreamOptions, UseStreamReturn } from "./hooks/useStream";
 
 export { useCompletion } from "./hooks/useCompletion";
 export type { UseCompletionOptions, UseCompletionReturn } from "./hooks/useCompletion";
+
+export { useChat } from "./hooks/useChat";
+export type { UseChatOptions, UseChatReturn } from "./hooks/useChat";
