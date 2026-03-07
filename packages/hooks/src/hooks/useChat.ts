@@ -51,6 +51,8 @@ export interface UseChatReturn {
   updateMessage: (id: string, updates: Partial<Message>) => void;
   /** Delete a specific message by ID */
   deleteMessage: (id: string) => void;
+  /** Edit a user message and resend — truncates history after that message and re-streams */
+  editAndResend: (id: string, newContent: string) => Promise<void>;
 }
 
 export function useChat(options: UseChatOptions): UseChatReturn {
@@ -308,6 +310,29 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     [saveMessages]
   );
 
+  const editAndResend = useCallback(
+    async (id: string, newContent: string) => {
+      const msgs = messagesRef.current;
+      const idx = msgs.findIndex((m) => m.id === id);
+      if (idx === -1) return;
+
+      // Update the target message and truncate everything after it
+      const updatedMessage: Message = {
+        id: msgs[idx]!.id,
+        role: msgs[idx]!.role,
+        content: newContent,
+        createdAt: new Date(),
+      };
+      const truncated = [...msgs.slice(0, idx), updatedMessage];
+      setMessages(truncated);
+
+      // Re-stream from this point — rollback target is before the edit
+      const preRequestMessages = msgs.slice(0, idx);
+      await streamRequest(truncated, preRequestMessages, truncated);
+    },
+    [streamRequest]
+  );
+
   return {
     messages,
     send,
@@ -320,5 +345,6 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     appendMessage,
     updateMessage,
     deleteMessage,
+    editAndResend,
   };
 }

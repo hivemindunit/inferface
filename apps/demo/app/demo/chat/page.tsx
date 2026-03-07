@@ -20,7 +20,7 @@ return (
 );`;
 
 export default function ChatDemo() {
-  const { messages, send, isLoading, abort, streamingContent, error, clear } =
+  const { messages, send, isLoading, abort, streamingContent, error, clear, editAndResend } =
     useChat({
       api: "/api/chat",
       providerFormat: "openai",
@@ -28,6 +28,8 @@ export default function ChatDemo() {
     });
 
   const [input, setInput] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -97,28 +99,94 @@ export default function ChatDemo() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${
+                  className={`flex group ${
                     msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                      msg.role === "user"
-                        ? "bg-emerald-600 text-white"
-                        : "bg-zinc-800 text-zinc-200"
-                    }`}
-                  >
-                    <pre className="whitespace-pre-wrap font-sans">
-                      {typeof msg.content === "string"
-                        ? msg.content
-                        : msg.content
-                            .filter(
-                              (p): p is { type: "text"; text: string } =>
-                                p.type === "text"
-                            )
-                            .map((p) => p.text)
-                            .join("")}
-                    </pre>
+                  {/* Edit button — only for user messages */}
+                  {msg.role === "user" && editingId !== msg.id && (
+                    <button
+                      onClick={() => {
+                        setEditingId(msg.id);
+                        setEditingContent(
+                          typeof msg.content === "string"
+                            ? msg.content
+                            : msg.content
+                                .filter((p): p is { type: "text"; text: string } => p.type === "text")
+                                .map((p) => p.text)
+                                .join("")
+                        );
+                      }}
+                      className="self-center mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-400 text-xs"
+                      title="Edit message"
+                    >
+                      ✏️
+                    </button>
+                  )}
+
+                  <div className={`max-w-[80%] ${msg.role === "user" ? "" : ""}`}>
+                    {/* Inline edit mode */}
+                    {msg.role === "user" && editingId === msg.id ? (
+                      <div className="space-y-2">
+                        <textarea
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              if (editingContent.trim()) {
+                                editAndResend(msg.id, editingContent.trim());
+                                setEditingId(null);
+                              }
+                            }
+                            if (e.key === "Escape") setEditingId(null);
+                          }}
+                          autoFocus
+                          rows={3}
+                          className="w-full min-w-[240px] rounded-xl border border-emerald-500/50 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-3 py-1.5 text-xs rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (editingContent.trim()) {
+                                editAndResend(msg.id, editingContent.trim());
+                                setEditingId(null);
+                              }
+                            }}
+                            disabled={!editingContent.trim()}
+                            className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40"
+                          >
+                            Send ↑
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                          msg.role === "user"
+                            ? "bg-emerald-600 text-white"
+                            : "bg-zinc-800 text-zinc-200"
+                        }`}
+                      >
+                        <pre className="whitespace-pre-wrap font-sans">
+                          {typeof msg.content === "string"
+                            ? msg.content
+                            : msg.content
+                                .filter(
+                                  (p): p is { type: "text"; text: string } =>
+                                    p.type === "text"
+                                )
+                                .map((p) => p.text)
+                                .join("")}
+                        </pre>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
