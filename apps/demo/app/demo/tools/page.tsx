@@ -178,11 +178,8 @@ export default function ToolsDemo() {
   return (
     <main className="h-screen overflow-hidden flex flex-col bg-zinc-950 text-zinc-100">
       {/* Header */}
-      <div className="shrink-0 px-6 pt-8 pb-4 max-w-6xl w-full mx-auto">
-        <a href="/" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
-          ← inferface
-        </a>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+      <div className="shrink-0 px-6 pt-20 pb-4 max-w-6xl w-full mx-auto">
+        <h1 className="text-3xl font-bold tracking-tight">
           Tool Calls with UI Confirmation
         </h1>
         <p className="mt-1 text-zinc-400">

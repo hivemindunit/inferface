@@ -1,0 +1,13 @@
+{
+  "name": "inferface",
+  "homepage": "https://inferface.dev",
+  "items": [
+    { "name": "streaming-text", "type": "registry:component", "description": "StreamingText component — streaming token renderer with markdown and syntax highlighting" },
+    { "name": "chat-thread", "type": "registry:component", "description": "ChatThread component — full chat message list with streaming, copy, and regenerate" },
+    { "name": "prompt-input", "type": "registry:component", "description": "PromptInput component — smart textarea with token estimation and model selector" },
+    { "name": "use-stream", "type": "registry:hook", "description": "useStream hook — low-level SSE/ReadableStream primitive" },
+    { "name": "use-completion", "type": "registry:hook", "description": "useCompletion hook — single-turn text completion with streaming" },
+    { "name": "use-chat", "type": "registry:hook", "description": "useChat hook — full conversational state with optimistic UI" },
+    { "name": "use-tool-calls", "type": "registry:hook", "description": "useToolCalls hook — parse and manage tool call approval flows" }
+  ]
+}
