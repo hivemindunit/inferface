@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import type { Message, ProviderFormat } from "../types/core";
 import { parseSSEStream } from "../utils/parseSSE";
 
+/** Options for the useChat hook */
 export interface UseChatOptions {
   /** API endpoint for chat completions */
   api: string;
@@ -28,6 +29,7 @@ export interface UseChatOptions {
   generateId?: () => string;
 }
 
+/** Return value of the useChat hook */
 export interface UseChatReturn {
   /** Full message history */
   messages: Message[];

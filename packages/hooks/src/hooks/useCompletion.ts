@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from "react";
 import type { ProviderFormat } from "../types/core";
 import { parseSSEStream } from "../utils/parseSSE";
 
+/** Options for the useCompletion hook */
 export interface UseCompletionOptions {
   /** API endpoint */
   api: string;
@@ -19,6 +20,7 @@ export interface UseCompletionOptions {
   onError?: (error: Error) => void;
 }
 
+/** Return value of the useCompletion hook */
 export interface UseCompletionReturn {
   /** Full completion text (streaming or final) */
   completion: string;

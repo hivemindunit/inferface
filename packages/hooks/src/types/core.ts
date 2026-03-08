@@ -1,11 +1,13 @@
 // Core types for @inferface/hooks
 // ---------------------------------------------------------------------------
 
+/** Custom fetch-like transport function for streaming requests */
 export type StreamTransport = (
   input: RequestInfo | URL,
   init?: RequestInit
 ) => Promise<Response>;
 
+/** Standard message roles in the chat interface */
 export type MessageRole = "user" | "assistant" | "system" | "tool";
 
 // ---------------------------------------------------------------------------
@@ -24,12 +26,14 @@ export interface ChartData {
   options?: Record<string, unknown>;
 }
 
+/** Rich content part — supports text, images, charts, and custom components */
 export type ContentPart =
   | { type: "text"; text: string }
   | { type: "image_url"; image_url: { url: string; alt?: string } }
   | { type: "chart"; data: ChartData }
   | { type: "custom"; component: string; props: unknown };
 
+/** A single message in the chat history */
 export interface Message {
   id: string;
   role: MessageRole;
@@ -44,6 +48,7 @@ export interface Message {
   toolCalls?: ToolCall[];
 }
 
+/** An LLM-initiated tool/function call */
 export interface ToolCall {
   id: string;
   type: "function";
@@ -53,12 +58,14 @@ export interface ToolCall {
   };
 }
 
+/** Result of executing a tool call */
 export interface ToolResult {
   toolCallId: string;
   result: unknown;
   error?: Error;
 }
 
+/** Supported LLM provider SSE formats */
 export type ProviderFormat = "openai" | "anthropic" | "custom";
 
 /**

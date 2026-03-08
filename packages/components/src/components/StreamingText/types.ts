@@ -1,3 +1,4 @@
+/** Props for the StreamingText component — renders text with live-streaming cursor and markdown support */
 export interface StreamingTextProps {
   /** The text content — can be partial/streaming */
   content: string;

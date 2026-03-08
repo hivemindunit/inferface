@@ -1,5 +1,6 @@
 import type { ContentPart, ToolCall, UseChatReturn } from "@inferface/hooks";
 
+/** A single chat message for the ChatThread component */
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "system" | "tool";
@@ -8,6 +9,7 @@ export interface ChatMessage {
   toolCalls?: ToolCall[];
 }
 
+/** Slot overrides for ChatThread subcomponents */
 export interface ChatThreadSlots {
   /** Custom avatar renderer per role */
   avatar?: (role: ChatMessage["role"]) => React.ReactNode;
@@ -25,6 +27,7 @@ export interface ChatThreadSlots {
   emptyState?: React.ReactNode;
 }
 
+/** Props for the ChatThread component — renders a scrollable, auto-scrolling chat message list */
 export interface ChatThreadProps {
   // === Controlled (headless) mode ===
   messages?: ChatMessage[];

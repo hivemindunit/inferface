@@ -149,4 +149,82 @@ describe("useCompletion", () => {
     expect(result.current.error?.message).toBe("Internal Server Error");
     expect(onError).toHaveBeenCalledOnce();
   });
+
+  it("falls back to HTTP status when error body is not JSON", async () => {
+    const onError = vi.fn();
+
+    mockFetch.mockResolvedValueOnce(
+      new Response("plain text error", {
+        status: 503,
+        headers: { "Content-Type": "text/plain" },
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useCompletion({
+        api: "https://test.api/error",
+        onError,
+      })
+    );
+
+    await act(async () => {
+      await result.current.complete("test");
+    });
+
+    expect(result.current.error?.message).toBe("HTTP 503");
+  });
+
+  it("handles Anthropic-style non-streaming JSON response", async () => {
+    const onFinish = vi.fn();
+
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          content: [{ text: "Anthropic response" }],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+    );
+
+    const { result } = renderHook(() =>
+      useCompletion({
+        api: "https://test.api/json",
+        onFinish,
+      })
+    );
+
+    await act(async () => {
+      await result.current.complete("test prompt");
+    });
+
+    expect(result.current.completion).toBe("Anthropic response");
+    expect(onFinish).toHaveBeenCalledWith("Anthropic response");
+  });
+
+  it("passes overrideBody to fetch", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["OK"]))
+    );
+
+    const { result } = renderHook(() =>
+      useCompletion({
+        api: "https://test.api/stream",
+        providerFormat: "openai",
+        body: { model: "base" },
+      })
+    );
+
+    await act(async () => {
+      await result.current.complete("test", { temperature: 0.7 });
+    });
+
+    const fetchCall = mockFetch.mock.calls[0];
+    const body = JSON.parse(fetchCall[1].body);
+    expect(body.model).toBe("base");
+    expect(body.prompt).toBe("test");
+    expect(body.temperature).toBe(0.7);
+  });
 });
