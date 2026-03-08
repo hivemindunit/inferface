@@ -7,8 +7,8 @@ import { ThemeProvider } from "./theme-provider";
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
-  title: "inferface demo",
-  description: "Demo app for @inferface streaming UI components",
+  title: "inferface — React primitives for streaming AI",
+  description: "Headless React hooks and components for streaming AI interfaces. Zero runtime dependencies. Works with OpenAI, Anthropic, or any SSE backend.",
 };
 
 export default function RootLayout({

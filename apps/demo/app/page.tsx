@@ -589,7 +589,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <span className="font-semibold">inferface</span>
             <span className="rounded-full border border-border px-2 py-0.5 text-xs">
-              0.0.1-alpha
+              1.0.0-alpha.1
             </span>
           </div>
           <div className="text-muted-foreground/60">built with inferface</div>

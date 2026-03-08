@@ -1,9 +1,18 @@
 {
   "name": "@inferface/hooks",
-  "version": "0.0.1",
-  "description": "Headless React hooks for GenAI streaming interfaces",
-  "keywords": ["react", "hooks", "ai", "streaming", "genai", "llm"],
+  "version": "1.0.0-alpha.1",
+  "description": "Headless React hooks for streaming AI interfaces",
+  "keywords": ["react", "ai", "streaming", "llm", "hooks", "genai"],
+  "homepage": "https://inferface.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hivemindunit/inferface.git",
+    "directory": "packages/hooks"
+  },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,7 +23,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
