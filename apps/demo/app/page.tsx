@@ -461,9 +461,9 @@ export default function Home() {
                 </div>
               </div>
               <p className="mt-3 text-sm font-medium text-muted-foreground text-center">inferface default</p>
-              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-x-auto">
                 <CodeSnippet
-                  code={`<ChatThread\n  classNames={{ userBubble: "bg-emerald-600 text-white" }}\n/>`}
+                  code={`<ChatThread\n  classNames={{\n    userBubble: "bg-emerald-600",\n  }}\n/>`}
                   lang="tsx"
                   className="text-[11px] leading-relaxed"
                 />
@@ -500,9 +500,9 @@ export default function Home() {
                 </div>
               </div>
               <p className="mt-3 text-sm font-medium text-muted-foreground text-center">Corporate blue</p>
-              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-x-auto">
                 <CodeSnippet
-                  code={`<ChatThread\n  classNames={{ userBubble: "bg-blue-600 text-white rounded-lg" }}\n/>`}
+                  code={`<ChatThread\n  classNames={{\n    userBubble: "bg-blue-600",\n  }}\n/>`}
                   lang="tsx"
                   className="text-[11px] leading-relaxed"
                 />
@@ -539,9 +539,9 @@ export default function Home() {
                 </div>
               </div>
               <p className="mt-3 text-sm font-medium text-muted-foreground text-center">Warm amber</p>
-              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-x-auto">
                 <CodeSnippet
-                  code={`<ChatThread\n  classNames={{ userBubble: "bg-amber-500 text-stone-900" }}\n/>`}
+                  code={`<ChatThread\n  classNames={{\n    userBubble: "bg-amber-500",\n  }}\n/>`}
                   lang="tsx"
                   className="text-[11px] leading-relaxed"
                 />
