@@ -294,6 +294,8 @@ export default function Home() {
   const cardsInView = useInView(cardsRef, { once: true, margin: "-80px" });
   const edgeCasesRef = useRef(null);
   const edgeCasesInView = useInView(edgeCasesRef, { once: true, margin: "-80px" });
+  const themesRef = useRef(null);
+  const themesInView = useInView(themesRef, { once: true, margin: "-80px" });
   const hitlRef = useRef(null);
   const hitlInView = useInView(hitlRef, { once: true, margin: "-80px" });
 
@@ -413,6 +415,138 @@ export default function Home() {
                 </MotionLink>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Theme Showcase ─────────────────────────────────────── */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Your brand. Your styles.
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+              inferface components accept a <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">classNames</code> prop for granular overrides. Drop-in to any design system.
+            </p>
+          </div>
+          <div ref={themesRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Theme 1 — Default */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={themesInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: 0 }}
+              className="flex flex-col"
+            >
+              <div className="glow-card rounded-2xl bg-zinc-900 p-4 flex flex-col h-[280px]">
+                <div className="flex-1 space-y-3 overflow-hidden">
+                  <div className="flex justify-end">
+                    <div className="bg-emerald-600 text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm max-w-[80%]">
+                      Summarize this for me
+                    </div>
+                  </div>
+                  <div className="flex justify-start">
+                    <div className="bg-zinc-800 text-zinc-100 rounded-2xl rounded-bl-sm px-3 py-2 text-sm max-w-[85%]">
+                      <p>Sure! Here&apos;s a concise breakdown of the key points across each section...</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2">
+                  <span className="flex-1 text-sm text-zinc-500">Message...</span>
+                  <span className="text-emerald-500">
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M3.105 2.29a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086L2.28 16.76a.75.75 0 00.826.95l15.202-7.745a.75.75 0 000-1.332L3.105 2.29z" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 text-sm font-medium text-muted-foreground text-center">inferface default</p>
+              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+                <CodeSnippet
+                  code={`<ChatThread\n  classNames={{ userBubble: "bg-emerald-600 text-white" }}\n/>`}
+                  lang="tsx"
+                  className="text-[11px] leading-relaxed"
+                />
+              </div>
+            </motion.div>
+
+            {/* Theme 2 — Corporate */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={themesInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="flex flex-col"
+            >
+              <div className="glow-card rounded-2xl bg-slate-900 p-4 flex flex-col h-[280px]">
+                <div className="flex-1 space-y-3 overflow-hidden">
+                  <div className="flex justify-end">
+                    <div className="bg-blue-600 text-white rounded-lg px-3 py-2 text-sm max-w-[80%]">
+                      Summarize this for me
+                    </div>
+                  </div>
+                  <div className="flex justify-start">
+                    <div className="bg-slate-700 text-slate-100 rounded-lg px-3 py-2 text-sm max-w-[85%]">
+                      <p>Sure! Here&apos;s a concise breakdown of the key points across each section...</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 bg-slate-800 border border-slate-600 rounded-xl px-3 py-2">
+                  <span className="flex-1 text-sm text-slate-500">Message...</span>
+                  <span className="text-blue-500">
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M3.105 2.29a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086L2.28 16.76a.75.75 0 00.826.95l15.202-7.745a.75.75 0 000-1.332L3.105 2.29z" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 text-sm font-medium text-muted-foreground text-center">Corporate blue</p>
+              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+                <CodeSnippet
+                  code={`<ChatThread\n  classNames={{ userBubble: "bg-blue-600 text-white rounded-lg" }}\n/>`}
+                  lang="tsx"
+                  className="text-[11px] leading-relaxed"
+                />
+              </div>
+            </motion.div>
+
+            {/* Theme 3 — Warm */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={themesInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="flex flex-col"
+            >
+              <div className="glow-card rounded-2xl bg-stone-900 p-4 flex flex-col h-[280px]">
+                <div className="flex-1 space-y-3 overflow-hidden">
+                  <div className="flex justify-end">
+                    <div className="bg-amber-500 text-stone-900 font-medium rounded-2xl rounded-br-sm px-3 py-2 text-sm max-w-[80%]">
+                      Summarize this for me
+                    </div>
+                  </div>
+                  <div className="flex justify-start">
+                    <div className="bg-stone-800 text-stone-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm max-w-[85%]">
+                      <p>Sure! Here&apos;s a concise breakdown of the key points across each section...</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 bg-stone-800 border border-stone-700 rounded-xl px-3 py-2">
+                  <span className="flex-1 text-sm text-stone-500">Message...</span>
+                  <span className="text-amber-400">
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M3.105 2.29a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086L2.28 16.76a.75.75 0 00.826.95l15.202-7.745a.75.75 0 000-1.332L3.105 2.29z" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 text-sm font-medium text-muted-foreground text-center">Warm amber</p>
+              <div className="mt-2 rounded-lg bg-muted border border-border p-3 overflow-hidden">
+                <CodeSnippet
+                  code={`<ChatThread\n  classNames={{ userBubble: "bg-amber-500 text-stone-900" }}\n/>`}
+                  lang="tsx"
+                  className="text-[11px] leading-relaxed"
+                />
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
