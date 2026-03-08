@@ -253,4 +253,85 @@ describe("useToolCalls", () => {
 
     expect(result.current.toolCalls).toHaveLength(1);
   });
+
+  it("reset() clears all state", () => {
+    const content = JSON.stringify([
+      {
+        id: "call_reset",
+        type: "function",
+        function: { name: "get_weather", arguments: '{}' },
+      },
+    ]);
+
+    const { result } = renderHook(() =>
+      useToolCalls({ stream: content, providerFormat: "openai" })
+    );
+
+    expect(result.current.toolCalls).toHaveLength(1);
+    expect(result.current.pendingCalls).toHaveLength(1);
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.toolCalls).toHaveLength(0);
+    expect(result.current.pendingCalls).toHaveLength(0);
+    expect(result.current.results.size).toBe(0);
+    expect(result.current.isExecuting).toBe(false);
+  });
+
+  it("respects MAX_DEPTH (5) for auto-execution", async () => {
+    const onToolCall = vi.fn().mockResolvedValue({ ok: true });
+    let streamValue = "";
+
+    const { result, rerender } = renderHook(
+      ({ stream }) => useToolCalls({ stream, providerFormat: "openai", onToolCall }),
+      { initialProps: { stream: streamValue } }
+    );
+
+    // Push 6 batches of tool calls — only first 5 should auto-execute
+    for (let i = 0; i < 6; i++) {
+      streamValue = JSON.stringify([
+        {
+          id: `call_depth_${i}`,
+          type: "function",
+          function: { name: "fn", arguments: "{}" },
+        },
+      ]);
+      rerender({ stream: streamValue });
+    }
+
+    await waitFor(() => {
+      // First 5 should have been auto-executed
+      expect(onToolCall).toHaveBeenCalledTimes(5);
+    });
+  });
+
+  it("skips tool calls with missing id or function name", () => {
+    const content = JSON.stringify([
+      {
+        id: null,
+        type: "function",
+        function: { name: "missing_id", arguments: "{}" },
+      },
+      {
+        id: "valid",
+        type: "function",
+        function: { name: null, arguments: "{}" },
+      },
+      {
+        id: "good_call",
+        type: "function",
+        function: { name: "valid_fn", arguments: "{}" },
+      },
+    ]);
+
+    const { result } = renderHook(() =>
+      useToolCalls({ stream: content, providerFormat: "openai" })
+    );
+
+    // Only the valid call should be parsed
+    expect(result.current.toolCalls).toHaveLength(1);
+    expect(result.current.toolCalls[0].id).toBe("good_call");
+  });
 });

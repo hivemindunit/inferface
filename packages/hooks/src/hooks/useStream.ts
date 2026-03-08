@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from "react";
 import type { ProviderFormat } from "../types/core";
 import { parseSSEStream } from "../utils/parseSSE";
 
+/** Options for the useStream hook */
 export interface UseStreamOptions {
   /** Endpoint to POST to, or a function returning a Response directly */
   api: string | (() => Promise<Response>);
@@ -25,6 +26,7 @@ export interface UseStreamOptions {
   flushMode?: "immediate" | "raf";
 }
 
+/** Return value of the useStream hook */
 export interface UseStreamReturn {
   content: string;
   isStreaming: boolean;

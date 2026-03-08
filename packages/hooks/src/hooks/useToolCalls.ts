@@ -5,6 +5,7 @@ import type { ToolCall, ToolResult, ProviderFormat } from "../types/core";
 // Types
 // ---------------------------------------------------------------------------
 
+/** Options for the useToolCalls hook */
 export interface UseToolCallsOptions {
   /**
    * Accumulated SSE content string to parse for tool calls.
@@ -23,6 +24,7 @@ export interface UseToolCallsOptions {
   providerFormat?: ProviderFormat;
 }
 
+/** Return value of the useToolCalls hook */
 export interface UseToolCallsReturn {
   /** All tool calls parsed so far (including completed ones) */
   toolCalls: ToolCall[];

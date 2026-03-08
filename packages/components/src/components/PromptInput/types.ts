@@ -1,3 +1,4 @@
+/** A model option for the PromptInput model selector */
 export interface ModelOption {
   id: string;
   label: string;
@@ -5,36 +6,56 @@ export interface ModelOption {
   contextWindow?: number;
 }
 
+/** Props for the PromptInput component — a textarea with submit, stop, model selector, and token estimation */
 export interface PromptInputProps {
   // === Core behavior ===
+  /** Controlled value for the textarea */
   value?: string;
+  /** Default uncontrolled value */
   defaultValue?: string;
+  /** Called when textarea content changes */
   onChange?: (value: string) => void;
+  /** Called when the user submits (Enter or Cmd+Enter depending on submitOn) */
   onSubmit?: (value: string) => void;
+  /** True while a request is in flight — disables input and shows loading state */
   isLoading?: boolean;
+  /** Called when user clicks the stop button (only shown when isLoading + onStop are set) */
   onStop?: () => void;
 
   // === Textarea ===
+  /** Placeholder text for the textarea */
   placeholder?: string;
-  maxRows?: number; // default: 8
-  minRows?: number; // default: 1
+  /** Maximum rows before textarea scrolls. Default: 8 */
+  maxRows?: number;
+  /** Minimum rows for the textarea. Default: 1 */
+  minRows?: number;
+  /** Disable the entire input */
   disabled?: boolean;
 
   // === Submit behavior ===
-  submitOn?: "enter" | "cmd-enter"; // default: "enter"
+  /** Submit trigger key. Default: "enter" */
+  submitOn?: "enter" | "cmd-enter";
 
   // === Token estimation ===
-  showTokenEstimate?: boolean; // default: false
+  /** Show estimated token count below the textarea. Default: false */
+  showTokenEstimate?: boolean;
+  /** Custom token estimator function. Default: Math.ceil(text.length / 4) */
   tokenEstimator?: (text: string) => number;
-  tokenWarningThreshold?: number; // default: 0.8
+  /** Fraction of context window to trigger warning color. Default: 0.8 */
+  tokenWarningThreshold?: number;
 
   // === Model selector ===
+  /** Available models for the dropdown selector */
   models?: ModelOption[];
+  /** Currently selected model ID */
   selectedModel?: string;
+  /** Called when user changes model selection */
   onModelChange?: (modelId: string) => void;
 
   // === Appearance ===
+  /** Class name on the root element */
   className?: string;
+  /** Class names for inner sub-elements */
   classNames?: {
     root?: string;
     textarea?: string;
@@ -46,7 +67,10 @@ export interface PromptInputProps {
   };
 
   // === Slots ===
+  /** Content rendered above the textarea */
   prepend?: React.ReactNode;
+  /** Content rendered in the toolbar row */
   toolbarSlot?: React.ReactNode;
+  /** Content rendered as context (e.g. attached files) above the textarea */
   contextSlot?: React.ReactNode;
 }
