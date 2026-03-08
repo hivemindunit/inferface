@@ -375,6 +375,154 @@ describe("useChat", () => {
     expect(result.current.messages[1].id).toBe("custom-2");
   });
 
+  it("editAndResend() truncates history and re-streams", async () => {
+    // First: send a message
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["First", " ", "answer"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("Original question");
+    });
+
+    expect(result.current.messages).toHaveLength(2);
+    const userMsgId = result.current.messages[0].id;
+
+    // Second: editAndResend
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["New", " ", "answer"]))
+    );
+
+    await act(async () => {
+      await result.current.editAndResend(userMsgId, "Edited question");
+    });
+
+    // Should have: edited user message + new assistant message
+    expect(result.current.messages).toHaveLength(2);
+    expect(result.current.messages[0].content).toBe("Edited question");
+    expect(result.current.messages[1].content).toBe("New answer");
+  });
+
+  it("editAndResend() no-ops for unknown message ID", async () => {
+    const { result } = renderHook(() =>
+      useChat({ api: "https://test.api/chat" })
+    );
+
+    await act(async () => {
+      await result.current.editAndResend("nonexistent-id", "whatever");
+    });
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(result.current.messages).toEqual([]);
+  });
+
+  it("handles non-streaming JSON response", async () => {
+    const onFinish = vi.fn();
+
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: "JSON response" } }],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        onFinish,
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("Hi");
+    });
+
+    expect(result.current.messages).toHaveLength(2);
+    expect(result.current.messages[1].content).toBe("JSON response");
+    expect(onFinish).toHaveBeenCalledOnce();
+  });
+
+  it("storage.save is called on send, clear, appendMessage, updateMessage, deleteMessage", async () => {
+    const storage = {
+      load: vi.fn().mockReturnValue([]),
+      save: vi.fn(),
+    };
+
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["Hi"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+        storage,
+      })
+    );
+
+    // send triggers save
+    await act(async () => {
+      await result.current.send("Hello");
+    });
+    expect(storage.save).toHaveBeenCalled();
+
+    const saveCountAfterSend = storage.save.mock.calls.length;
+
+    // appendMessage triggers save
+    act(() => {
+      result.current.appendMessage({ role: "user", content: "appended" });
+    });
+    expect(storage.save.mock.calls.length).toBeGreaterThan(saveCountAfterSend);
+
+    // deleteMessage triggers save
+    const lastMsgId = result.current.messages[result.current.messages.length - 1].id;
+    act(() => {
+      result.current.deleteMessage(lastMsgId);
+    });
+
+    // clear triggers save with empty array
+    act(() => {
+      result.current.clear();
+    });
+    expect(storage.save).toHaveBeenCalledWith([]);
+  });
+
+  it("falls back to HTTP status when error body cannot be parsed", async () => {
+    const onError = vi.fn();
+
+    mockFetch.mockResolvedValueOnce(
+      new Response("not json", {
+        status: 502,
+        headers: { "Content-Type": "text/plain" },
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        onError,
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("test");
+    });
+
+    expect(result.current.error?.message).toBe("HTTP 502");
+  });
+
   it("initialMessages seeds the conversation", () => {
     const initial = [
       { id: "init-1", role: "user" as const, content: "Pre-loaded" },
