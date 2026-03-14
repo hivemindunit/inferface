@@ -1,7 +1,7 @@
 /**
  * Mock "Generative UI" AI endpoint.
- * Streams text then emits a material-picker tool call.
- * On phase=after_tools, responds with a recommendation based on the user's selection.
+ * Streams text then emits an option-picker tool call.
+ * On phase=after_tools, responds based on the user's selection.
  */
 
 function sleep(ms: number) {
@@ -27,40 +27,41 @@ export async function POST(req: Request) {
 
       if (phase === "initial") {
         const intro =
-          "I'd love to help you pick the perfect flooring! Let me show you some options based on your room.\n\n";
+          "Sure! To set up your assistant, I need to know how you'd like it to communicate. Choose the style that fits best.\n\n";
         for (const char of intro) {
           sendDelta(char);
           await sleep(15);
         }
 
-        // Emit a material-picker tool call
         const toolCalls = [
           {
-            id: "call_material_1",
+            id: "call_style_1",
             type: "function",
             function: {
-              name: "material-picker",
+              name: "option-picker",
               arguments: JSON.stringify({
-                label: "Choose your flooring grade",
-                category: "flooring",
+                label: "Choose a response style",
                 options: [
                   {
-                    grade: "economy",
-                    label: "Laminate",
-                    description: "Durable and budget-friendly. Great for high-traffic areas.",
-                    priceHint: "$2–$5 / sq ft",
+                    id: "concise",
+                    label: "Concise",
+                    description: "Short, direct answers. No preamble, no filler.",
+                    badge: "fast",
+                    badgeColor: "blue",
                   },
                   {
-                    grade: "mid-range",
-                    label: "Engineered Hardwood",
-                    description: "Real wood veneer over plywood. Looks great, handles moisture better than solid.",
-                    priceHint: "$6–$12 / sq ft",
+                    id: "balanced",
+                    label: "Balanced",
+                    description: "Clear explanations with just enough context.",
+                    badge: "default",
+                    badgeColor: "emerald",
                   },
                   {
-                    grade: "luxury",
-                    label: "Solid Hardwood",
-                    description: "Timeless beauty. White oak or walnut, sanded and refinished for decades.",
-                    priceHint: "$12–$25 / sq ft",
+                    id: "detailed",
+                    label: "Detailed",
+                    description: "Thorough responses with examples, caveats, and reasoning.",
+                    badge: "thorough",
+                    badgeColor: "purple",
                   },
                 ],
               }),
@@ -70,42 +71,38 @@ export async function POST(req: Request) {
 
         sendDelta(`[TOOL_CALLS]${JSON.stringify(toolCalls)}`);
       } else if (phase === "after_tools") {
-        const materialResult = toolResults["call_material_1"];
+        const styleResult = toolResults["call_style_1"];
+        const selected =
+          styleResult && typeof styleResult === "object" && "selected" in styleResult
+            ? (styleResult as { selected: string }).selected
+            : "balanced";
 
-        let grade = "mid-range";
-        if (materialResult && typeof materialResult === "object" && "grade" in materialResult) {
-          grade = (materialResult as { grade: string }).grade;
-        }
-
-        const recommendations: Record<string, string[]> = {
-          economy: [
-            "## Great Choice — Laminate Flooring! 🏠\n\n",
-            "Here's what I'd recommend for your space:\n\n",
-            "- **Pergo TimberCraft** — waterproof laminate, realistic wood look — ~$3.50/sq ft\n",
-            "- **Shaw Repel** — scratch-resistant, perfect with pets — ~$2.80/sq ft\n",
-            "- **Mohawk RevWood** — eco-friendly option with 30-year warranty — ~$4.20/sq ft\n\n",
-            "**Pro tip:** Budget ~$500–$1,200 for a 200 sq ft room including installation.\n",
+        const responses: Record<string, string[]> = {
+          concise: [
+            "Got it — **Concise** mode enabled.\n\n",
+            "Your assistant will:\n",
+            "- Skip preamble and filler\n",
+            "- Lead with the answer\n",
+            "- Use bullet points over paragraphs\n\n",
+            "You can change this any time by asking to switch styles.\n",
           ],
-          "mid-range": [
-            "## Excellent Pick — Engineered Hardwood! 🌳\n\n",
-            "For your room, I'd suggest:\n\n",
-            "- **Shaw Floorté Pantheon** — wide plank, white oak look — ~$8/sq ft\n",
-            "- **Mohawk UltraWood** — hickory, hand-scraped finish — ~$9.50/sq ft\n",
-            "- **Bruce Hydropel** — waterproof engineered oak — ~$7/sq ft\n\n",
-            "**Pro tip:** Budget ~$1,800–$3,500 for a 200 sq ft room including installation.\n",
+          balanced: [
+            "**Balanced** mode enabled.\n\n",
+            "Your assistant will give clear, well-structured answers — enough context to be useful, not so much that it buries the point.\n\n",
+            "This is the default for most workflows. Switch to Concise when speed matters, or Detailed when you need depth.\n",
           ],
-          luxury: [
-            "## Beautiful Selection — Solid Hardwood! ✨\n\n",
-            "Premium options for your space:\n\n",
-            "- **Carlisle Wide Plank White Oak** — custom widths, stunning grain — ~$15/sq ft\n",
-            "- **Mirage Sweet Memories Walnut** — rich, warm tones — ~$18/sq ft\n",
-            "- **Lauzon Designer Collection** — FSC certified, pure genius finish — ~$14/sq ft\n\n",
-            "**Pro tip:** Budget ~$3,500–$6,000 for a 200 sq ft room including professional installation.\n",
+          detailed: [
+            "**Detailed** mode enabled.\n\n",
+            "Your assistant will:\n",
+            "- Explain reasoning, not just conclusions\n",
+            "- Surface edge cases and tradeoffs\n",
+            "- Include examples where helpful\n",
+            "- Flag assumptions it's making\n\n",
+            "Great for research, code review, or any task where you want full transparency. Switch to Balanced or Concise when you want faster responses.\n",
           ],
         };
 
-        const lines = recommendations[grade] ?? recommendations["mid-range"];
-
+        const lines = responses[selected] ?? responses["balanced"];
         for (const line of lines) {
           for (const char of line) {
             sendDelta(char);
