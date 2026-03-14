@@ -1,10 +1,7 @@
 {
-  "headers": [
-    {
-      "source": "/registry/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
-      ]
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd ../.. && pnpm build --filter=@inferface/hooks --filter=@inferface/components && cd apps/demo && pnpm build",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "outputDirectory": "apps/demo/.next"
 }
