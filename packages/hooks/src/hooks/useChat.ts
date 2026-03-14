@@ -27,6 +27,10 @@ export interface UseChatOptions {
   };
   /** Generate message IDs. Defaults to crypto.randomUUID() */
   generateId?: () => string;
+  /** Tool definitions to include in request body */
+  tools?: object[];
+  /** When true, resolved tool results automatically trigger a follow-up completion */
+  autoSubmitToolResults?: boolean;
 }
 
 /** Return value of the useChat hook */
@@ -55,6 +59,8 @@ export interface UseChatReturn {
   deleteMessage: (id: string) => void;
   /** Edit a user message and resend — truncates history after that message and re-streams */
   editAndResend: (id: string, newContent: string) => Promise<void>;
+  /** Submit tool results and optionally trigger a follow-up completion */
+  submitToolResults: (toolResults: Record<string, unknown>) => Promise<void>;
 }
 
 export function useChat(options: UseChatOptions): UseChatReturn {
@@ -149,6 +155,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           body: JSON.stringify({
             ...opts.body,
             messages: apiMessages,
+            ...(opts.tools ? { tools: opts.tools } : {}),
           }),
           signal: controller.signal,
         });
@@ -335,6 +342,29 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     [streamRequest]
   );
 
+  const submitToolResults = useCallback(
+    async (toolResults: Record<string, unknown>) => {
+      // Append tool result messages
+      const msgs = messagesRef.current;
+      const toolMessages: Message[] = Object.entries(toolResults).map(([toolCallId, result]) => ({
+        id: genId(),
+        role: "tool" as const,
+        content: typeof result === "string" ? result : JSON.stringify(result),
+        toolCallId,
+        createdAt: new Date(),
+      }));
+
+      const withToolResults = [...msgs, ...toolMessages];
+      setMessages(withToolResults);
+
+      // If autoSubmitToolResults is enabled, trigger a follow-up completion
+      if (optionsRef.current.autoSubmitToolResults) {
+        await streamRequest(withToolResults, msgs, withToolResults);
+      }
+    },
+    [genId, streamRequest]
+  );
+
   return {
     messages,
     send,
@@ -348,5 +378,6 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     updateMessage,
     deleteMessage,
     editAndResend,
+    submitToolResults,
   };
 }

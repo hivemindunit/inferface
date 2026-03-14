@@ -1,4 +1,4 @@
-import type { ContentPart, ToolCall, UseChatReturn } from "@inferface/hooks";
+import type { ContentPart, ToolCall, UseChatReturn, GenerativeUIRegistry } from "@inferface/hooks";
 
 /** A single chat message for the ChatThread component */
 export interface ChatMessage {
@@ -62,4 +62,10 @@ export interface ChatThreadProps {
 
   // === Slots ===
   slots?: ChatThreadSlots;
+
+  // === Generative UI ===
+  /** Maps tool call names to React components for generative UI rendering */
+  componentRegistry?: GenerativeUIRegistry;
+  /** Called when a generative UI component submits a result */
+  onGenerativeUIResult?: (toolCallId: string, result: unknown) => void;
 }

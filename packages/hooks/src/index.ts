@@ -29,3 +29,11 @@ export type { UseChatOptions, UseChatReturn } from "./hooks/useChat";
 
 export { useToolCalls } from "./hooks/useToolCalls";
 export type { UseToolCallsOptions, UseToolCallsReturn } from "./hooks/useToolCalls";
+
+export { useGenerativeUI } from "./hooks/useGenerativeUI";
+export type {
+  GenerativeUIComponentProps,
+  GenerativeUIRegistry,
+  UseGenerativeUIOptions,
+  UseGenerativeUIReturn,
+} from "./hooks/useGenerativeUI";

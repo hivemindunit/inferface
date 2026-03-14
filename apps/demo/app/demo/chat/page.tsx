@@ -37,6 +37,7 @@ export default function ChatDemo() {
     updateMessage,
     deleteMessage,
     editAndResend,
+    submitToolResults,
   } = useChat({
     api: "/api/chat",
     providerFormat: "openai",
@@ -77,6 +78,7 @@ export default function ChatDemo() {
                 updateMessage,
                 deleteMessage,
                 editAndResend,
+                submitToolResults,
               }}
               className="flex-1 min-h-0"
             />

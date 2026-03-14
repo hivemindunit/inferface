@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { extractText } from "@inferface/hooks";
+import { extractText, useGenerativeUI } from "@inferface/hooks";
+import type { GenerativeUIRegistry } from "@inferface/hooks";
 import { cn } from "../../lib/utils";
 import { StreamingText } from "../StreamingText";
 import type { ChatMessage, ChatThreadProps, ChatThreadSlots } from "./types";
@@ -155,6 +156,8 @@ export function ChatThread({
   showRegenerateButton = true,
   renderMarkdown = true,
   slots,
+  componentRegistry,
+  onGenerativeUIResult,
 }: ChatThreadProps) {
   // Derive state: prefer `chat` prop if provided, fall back to controlled props
   const messages = (chat?.messages ?? messagesProp ?? []) as ChatMessage[];
@@ -164,6 +167,13 @@ export function ChatThread({
     ? () => chat.regenerate()
     : onRegenerate;
   const editAndResend = chat?.editAndResend;
+
+  // Generative UI
+  const noopOnResult = useCallback((_id: string, _result: unknown) => {}, []);
+  const { renderToolCall, isRegistered: isGenUIRegistered } = useGenerativeUI({
+    registry: componentRegistry ?? {},
+    onResult: onGenerativeUIResult ?? noopOnResult,
+  });
 
   // Auto-scroll
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -346,6 +356,54 @@ export function ChatThread({
                         {getTextContent(msg.content)}
                       </pre>
                     )}
+                  </div>
+                )}
+
+                {/* Generative UI tool calls */}
+                {isAssistant && msg.toolCalls && msg.toolCalls.length > 0 && componentRegistry && (
+                  <div className="mt-2 space-y-2 w-full">
+                    {msg.toolCalls.map((tc) => {
+                      const genNode = renderToolCall(tc);
+                      if (genNode) {
+                        return (
+                          <div key={tc.id} className="rounded-xl border border-border bg-card/50 p-3">
+                            {genNode}
+                          </div>
+                        );
+                      }
+                      // Fallback: approve/reject UI for unregistered tool calls
+                      return (
+                        <div
+                          key={tc.id}
+                          className="rounded-xl border border-amber-700/50 bg-amber-950/20 p-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-sm font-medium text-foreground">
+                                Tool: {tc.function.name}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-0.5 truncate max-w-[300px]">
+                                {tc.function.arguments}
+                              </div>
+                            </div>
+                            <div className="flex gap-2 shrink-0">
+                              <button
+                                onClick={() => onGenerativeUIResult?.(tc.id, { approved: true })}
+                                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-500 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => onGenerativeUIResult?.(tc.id, { approved: false })}
+                                className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/20 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 

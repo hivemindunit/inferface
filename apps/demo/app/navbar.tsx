@@ -56,6 +56,7 @@ const NAV_LINKS = [
   { label: "Streaming", href: "/demo/streaming" },
   { label: "Chat", href: "/demo/chat" },
   { label: "Tools", href: "/demo/tools" },
+  { label: "Generative UI", href: "/demo/generative" },
 ];
 
 export function Navbar() {
