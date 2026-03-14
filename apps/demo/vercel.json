@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd ../.. && pnpm build --filter=@inferface/hooks --filter=@inferface/components && cd apps/demo && pnpm build",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "framework": "nextjs",
-  "outputDirectory": "apps/demo/.next"
+  "buildCommand": "cd ../.. && pnpm build --filter=@inferface/hooks --filter=@inferface/components && cd apps/demo && pnpm build",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
 }
