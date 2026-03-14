@@ -36,6 +36,25 @@ function MoonIcon({ className }: { className?: string }) {
   );
 }
 
+function HamburgerIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -60,13 +79,22 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="text-lg font-bold tracking-tight text-foreground hover:text-foreground/80 transition-colors">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="text-lg font-bold tracking-tight text-foreground hover:text-foreground/80 transition-colors"
+          onClick={() => setMenuOpen(false)}
+        >
           inferface
         </Link>
-        <div className="flex items-center gap-1">
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -88,7 +116,46 @@ export function Navbar() {
             <GitHubIcon className="h-4 w-4" />
           </a>
         </div>
+
+        {/* Mobile right side */}
+        <div className="flex md:hidden items-center gap-1">
+          <ThemeToggle />
+          <a
+            href="https://github.com/hivemindunit/inferface"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="GitHub"
+          >
+            <GitHubIcon className="h-4 w-4" />
+          </a>
+          <button
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+          >
+            {menuOpen ? <CloseIcon className="h-4 w-4" /> : <HamburgerIcon className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+          <div className="flex flex-col px-4 py-3 gap-1">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
