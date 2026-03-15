@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import type { Message, ProviderFormat } from "../types/core";
+import type { Message, ContentPart, ToolCall, ProviderFormat } from "../types/core";
 import { parseSSEStream } from "../utils/parseSSE";
+import { fileToBase64 } from "../utils/fileToBase64";
 
 /** Options for the useChat hook */
 export interface UseChatOptions {
@@ -38,7 +39,7 @@ export interface UseChatReturn {
   /** Full message history */
   messages: Message[];
   /** Send a user message and stream the assistant response */
-  send: (content: string, attachments?: File[]) => Promise<void>;
+  send: (content: string, attachments?: File[], requestBody?: Record<string, unknown>) => Promise<void>;
   /** Abort the current stream */
   abort: () => void;
   /** True while streaming */
@@ -61,6 +62,8 @@ export interface UseChatReturn {
   editAndResend: (id: string, newContent: string) => Promise<void>;
   /** Submit tool results and optionally trigger a follow-up completion */
   submitToolResults: (toolResults: Record<string, unknown>) => Promise<void>;
+  /** Update the base body used for all subsequent requests */
+  setBody: (body: Record<string, unknown>) => void;
 }
 
 export function useChat(options: UseChatOptions): UseChatReturn {
@@ -79,6 +82,15 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   // Track latest options to avoid stale closures
   const optionsRef = useRef(options);
   optionsRef.current = options;
+
+  // Mutable base body (can be updated via setBody)
+  const bodyRef = useRef<Record<string, unknown>>(options.body ?? {});
+  // Keep in sync with options.body when it changes
+  useEffect(() => {
+    if (options.body) {
+      bodyRef.current = options.body;
+    }
+  }, [options.body]);
 
   const genId = useCallback(() => {
     return optionsRef.current.generateId?.() ?? crypto.randomUUID();
@@ -113,16 +125,22 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     abortControllerRef.current?.abort();
   }, []);
 
+  const setBody = useCallback((body: Record<string, unknown>) => {
+    bodyRef.current = body;
+  }, []);
+
   /**
    * Core streaming request. Accepts the messages to send in the request body,
    * and the optimistic messages state (for rollback on error).
    * Returns the committed assistant Message on success, or throws.
+   * `perRequestBody` is merged (shallow) with the base body for this request only.
    */
   const streamRequest = useCallback(
     async (
       requestMessages: Message[],
       preRequestMessages: Message[],
-      currentMessages: Message[]
+      currentMessages: Message[],
+      perRequestBody?: Record<string, unknown>
     ): Promise<void> => {
       // Abort any in-flight request
       abortControllerRef.current?.abort();
@@ -137,13 +155,19 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       const opts = optionsRef.current;
 
       // Build the messages payload for the API
-      const apiMessages: Array<{ role: string; content: string | import("../types/core").ContentPart[] }> = [];
+      const apiMessages: Array<{ role: string; content: string | ContentPart[] }> = [];
       if (opts.systemPrompt) {
         apiMessages.push({ role: "system", content: opts.systemPrompt });
       }
       for (const msg of requestMessages) {
         apiMessages.push({ role: msg.role, content: msg.content });
       }
+
+      // Merge body: base body + per-request body (per-request wins)
+      const mergedBody = {
+        ...bodyRef.current,
+        ...(perRequestBody ?? {}),
+      };
 
       try {
         const response = await fetch(opts.api, {
@@ -153,7 +177,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
             ...opts.headers,
           },
           body: JSON.stringify({
-            ...opts.body,
+            ...mergedBody,
             messages: apiMessages,
             ...(opts.tools ? { tools: opts.tools } : {}),
           }),
@@ -207,12 +231,34 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           setStreamingContent(text);
         }
 
+        // --- Gap 3: Parse [TOOL_CALLS] from streamed content ---
+        const finalContent = streamingContentRef.current;
+        const toolCallsMarker = "[TOOL_CALLS]";
+        const markerIdx = finalContent.indexOf(toolCallsMarker);
+
+        let commitContent: string | ContentPart[] = finalContent;
+        let parsedToolCalls: ToolCall[] | undefined;
+
+        if (markerIdx !== -1) {
+          const visibleContent = finalContent.slice(0, markerIdx).trim();
+          const toolCallsJson = finalContent.slice(markerIdx + toolCallsMarker.length).trim();
+          try {
+            parsedToolCalls = JSON.parse(toolCallsJson) as ToolCall[];
+          } catch {
+            parsedToolCalls = undefined;
+          }
+          commitContent = visibleContent;
+        }
+
         // Commit the assistant message
         const assistantMessage: Message = {
           id: genId(),
           role: "assistant",
-          content: streamingContentRef.current,
+          content: commitContent,
           createdAt: new Date(),
+          ...(parsedToolCalls && parsedToolCalls.length > 0
+            ? { toolCalls: parsedToolCalls }
+            : {}),
         };
 
         const finalMessages = [...currentMessages, assistantMessage];
@@ -239,11 +285,29 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   );
 
   const send = useCallback(
-    async (content: string, _attachments?: File[]) => {
+    async (content: string, attachments?: File[], requestBody?: Record<string, unknown>) => {
+      // Build user message content — multimodal when attachments present
+      let messageContent: string | ContentPart[];
+      if (attachments && attachments.length > 0) {
+        const contentParts: ContentPart[] = [{ type: "text", text: content }];
+        for (const file of attachments) {
+          const base64 = await fileToBase64(file);
+          contentParts.push({
+            type: "image_url",
+            image_url: {
+              url: `data:${file.type};base64,${base64}`,
+            },
+          });
+        }
+        messageContent = contentParts;
+      } else {
+        messageContent = content;
+      }
+
       const userMessage: Message = {
         id: genId(),
         role: "user",
-        content,
+        content: messageContent,
         createdAt: new Date(),
       };
 
@@ -252,7 +316,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       const withUserMessage = [...preRequestMessages, userMessage];
       setMessages(withUserMessage);
 
-      await streamRequest(withUserMessage, preRequestMessages, withUserMessage);
+      await streamRequest(withUserMessage, preRequestMessages, withUserMessage, requestBody);
     },
     [genId, streamRequest]
   );
@@ -379,5 +443,6 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     deleteMessage,
     editAndResend,
     submitToolResults,
+    setBody,
   };
 }

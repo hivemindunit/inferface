@@ -21,7 +21,7 @@ describe("PromptInput", () => {
 
     fireEvent.keyDown(textarea, { key: "Enter", shiftKey: false });
 
-    expect(onSubmit).toHaveBeenCalledWith("Hello");
+    expect(onSubmit).toHaveBeenCalledWith("Hello", undefined);
   });
 
   it("does NOT submit on Shift+Enter (newline instead)", () => {
@@ -41,7 +41,7 @@ describe("PromptInput", () => {
 
     fireEvent.keyDown(textarea, { key: "Enter", shiftKey: false });
 
-    expect(onSubmit).toHaveBeenCalledWith("Hello");
+    expect(onSubmit).toHaveBeenCalledWith("Hello", undefined);
     expect(textarea.value).toBe("");
   });
 

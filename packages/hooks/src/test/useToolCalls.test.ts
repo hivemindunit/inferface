@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useToolCalls } from "../hooks/useToolCalls";
+import type { Message } from "../types/core";
 
 describe("useToolCalls", () => {
   it("parses tool calls from [TOOL_CALLS] marker in string", () => {
@@ -333,5 +334,73 @@ describe("useToolCalls", () => {
     // Only the valid call should be parsed
     expect(result.current.toolCalls).toHaveLength(1);
     expect(result.current.toolCalls[0].id).toBe("good_call");
+  });
+
+  // ==========================================================================
+  // Messages-based input (Gap 3 integration)
+  // ==========================================================================
+
+  it("reads tool calls from committed messages", () => {
+    const messages: Message[] = [
+      { id: "1", role: "user", content: "Search for flights" },
+      {
+        id: "2",
+        role: "assistant",
+        content: "Let me search for flights.",
+        toolCalls: [
+          {
+            id: "call_msg_1",
+            type: "function",
+            function: { name: "search_flights", arguments: '{"origin":"YYZ"}' },
+          },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useToolCalls({ stream: "", messages, providerFormat: "openai" })
+    );
+
+    expect(result.current.toolCalls).toHaveLength(1);
+    expect(result.current.toolCalls[0].id).toBe("call_msg_1");
+    expect(result.current.toolCalls[0].function.name).toBe("search_flights");
+    expect(result.current.pendingCalls).toHaveLength(1);
+  });
+
+  it("deduplicates tool calls from both stream and messages", () => {
+    const toolCallsJson = JSON.stringify([
+      {
+        id: "call_dedup_both",
+        type: "function",
+        function: { name: "get_weather", arguments: '{"city":"NYC"}' },
+      },
+    ]);
+
+    const messages: Message[] = [
+      {
+        id: "2",
+        role: "assistant",
+        content: "Checking weather",
+        toolCalls: [
+          {
+            id: "call_dedup_both",
+            type: "function",
+            function: { name: "get_weather", arguments: '{"city":"NYC"}' },
+          },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useToolCalls({
+        stream: `[TOOL_CALLS]${toolCallsJson}`,
+        messages,
+        providerFormat: "openai",
+      })
+    );
+
+    // Should only have 1 tool call, not duplicated
+    expect(result.current.toolCalls).toHaveLength(1);
+    expect(result.current.toolCalls[0].id).toBe("call_dedup_both");
   });
 });

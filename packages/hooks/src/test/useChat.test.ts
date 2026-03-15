@@ -538,4 +538,262 @@ describe("useChat", () => {
     expect(result.current.messages).toHaveLength(1);
     expect(result.current.messages[0].content).toBe("Pre-loaded");
   });
+
+  // ==========================================================================
+  // Gap 1: Multimodal / vision support
+  // ==========================================================================
+
+  it("send() with File attachments builds multimodal content", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["I see an image"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+      })
+    );
+
+    // Create a mock File
+    const file = new File(["fake-image-data"], "photo.png", { type: "image/png" });
+
+    // Mock FileReader for base64 conversion
+    const originalFileReader = globalThis.FileReader;
+    const mockReader = {
+      result: "data:image/png;base64,ZmFrZS1pbWFnZS1kYXRh",
+      onloadend: null as (() => void) | null,
+      onerror: null as ((err: any) => void) | null,
+      readAsDataURL(_file: File) {
+        setTimeout(() => this.onloadend?.(), 0);
+      },
+    };
+    vi.stubGlobal("FileReader", vi.fn(() => mockReader));
+
+    await act(async () => {
+      await result.current.send("Describe this image", [file]);
+    });
+
+    vi.stubGlobal("FileReader", originalFileReader);
+
+    // User message should have ContentPart[] content
+    const userMsg = result.current.messages[0];
+    expect(Array.isArray(userMsg.content)).toBe(true);
+    const parts = userMsg.content as any[];
+    expect(parts[0]).toEqual({ type: "text", text: "Describe this image" });
+    expect(parts[1].type).toBe("image_url");
+    expect(parts[1].image_url.url).toContain("data:image/png;base64,");
+
+    // The request body should contain the multimodal content
+    const fetchCall = mockFetch.mock.calls[0];
+    const body = JSON.parse(fetchCall[1].body);
+    const userApiMsg = body.messages[0];
+    expect(Array.isArray(userApiMsg.content)).toBe(true);
+    expect(userApiMsg.content[0].type).toBe("text");
+    expect(userApiMsg.content[1].type).toBe("image_url");
+  });
+
+  it("send() without attachments keeps string content", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["OK"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("Just text");
+    });
+
+    expect(typeof result.current.messages[0].content).toBe("string");
+    expect(result.current.messages[0].content).toBe("Just text");
+  });
+
+  // ==========================================================================
+  // Gap 2: Per-request body override & setBody
+  // ==========================================================================
+
+  it("send() with requestBody merges with base body for single request", async () => {
+    mockFetch.mockResolvedValue(
+      mockSSEResponse(openAIStream(["OK"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+        body: { model: "gpt-4o", temperature: 0.7 },
+      })
+    );
+
+    // First send with per-request body
+    await act(async () => {
+      await result.current.send("First", undefined, { context: "extra", temperature: 0.2 });
+    });
+
+    const body1 = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body1.model).toBe("gpt-4o");
+    expect(body1.temperature).toBe(0.2); // per-request wins
+    expect(body1.context).toBe("extra");
+
+    // Second send without per-request body — should NOT have context
+    await act(async () => {
+      await result.current.send("Second");
+    });
+
+    const body2 = JSON.parse(mockFetch.mock.calls[1][1].body);
+    expect(body2.model).toBe("gpt-4o");
+    expect(body2.temperature).toBe(0.7); // back to base
+    expect(body2.context).toBeUndefined();
+  });
+
+  it("setBody() updates base body for subsequent requests", async () => {
+    mockFetch.mockResolvedValue(
+      mockSSEResponse(openAIStream(["OK"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+        body: { model: "gpt-4o" },
+      })
+    );
+
+    // Update body
+    act(() => {
+      result.current.setBody({ model: "gpt-4o-mini", stream: true });
+    });
+
+    await act(async () => {
+      await result.current.send("Test");
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.model).toBe("gpt-4o-mini");
+    expect(body.stream).toBe(true);
+  });
+
+  // ==========================================================================
+  // Gap 3: Tool calls stored on assistant messages
+  // ==========================================================================
+
+  it("strips [TOOL_CALLS] from content and stores toolCalls on assistant message", async () => {
+    const toolCallsPayload = JSON.stringify([
+      {
+        id: "call_123",
+        type: "function",
+        function: { name: "get_weather", arguments: '{"city":"Paris"}' },
+      },
+    ]);
+    const streamContent = `Let me check the weather.\n[TOOL_CALLS]${toolCallsPayload}`;
+
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream([streamContent]))
+    );
+
+    const onFinish = vi.fn();
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+        onFinish,
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("What's the weather?");
+    });
+
+    const assistantMsg = result.current.messages[1];
+    // Visible content should NOT contain the [TOOL_CALLS] block
+    expect(assistantMsg.content).toBe("Let me check the weather.");
+    expect(typeof assistantMsg.content).toBe("string");
+
+    // Tool calls should be on the message
+    expect(assistantMsg.toolCalls).toBeDefined();
+    expect(assistantMsg.toolCalls).toHaveLength(1);
+    expect(assistantMsg.toolCalls![0].id).toBe("call_123");
+    expect(assistantMsg.toolCalls![0].function.name).toBe("get_weather");
+
+    // onFinish should receive the cleaned message
+    expect(onFinish.mock.calls[0][0].content).toBe("Let me check the weather.");
+    expect(onFinish.mock.calls[0][0].toolCalls).toHaveLength(1);
+  });
+
+  it("handles response with no [TOOL_CALLS] marker normally", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["Just a plain response"]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("Hi");
+    });
+
+    const assistantMsg = result.current.messages[1];
+    expect(assistantMsg.content).toBe("Just a plain response");
+    expect(assistantMsg.toolCalls).toBeUndefined();
+  });
+
+  // ==========================================================================
+  // Gap 4: submitToolResults ordering
+  // ==========================================================================
+
+  it("submitToolResults appends tool messages after assistant and triggers follow-up", async () => {
+    // First response: assistant with tool calls
+    const toolCallsPayload = JSON.stringify([
+      { id: "call_abc", type: "function", function: { name: "search", arguments: '{"q":"test"}' } },
+    ]);
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream([`Searching...\n[TOOL_CALLS]${toolCallsPayload}`]))
+    );
+
+    const { result } = renderHook(() =>
+      useChat({
+        api: "https://test.api/chat",
+        providerFormat: "openai",
+        autoSubmitToolResults: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.send("Search for test");
+    });
+
+    // Now we have: user, assistant (with toolCalls)
+    expect(result.current.messages).toHaveLength(2);
+    expect(result.current.messages[1].toolCalls).toHaveLength(1);
+
+    // Submit tool results — triggers follow-up
+    mockFetch.mockResolvedValueOnce(
+      mockSSEResponse(openAIStream(["Here are the results"]))
+    );
+
+    await act(async () => {
+      await result.current.submitToolResults({ call_abc: { results: ["found"] } });
+    });
+
+    // Should have: user, assistant, tool, assistant (follow-up)
+    expect(result.current.messages).toHaveLength(4);
+    expect(result.current.messages[2].role).toBe("tool");
+    expect(result.current.messages[2].toolCallId).toBe("call_abc");
+    expect(result.current.messages[3].role).toBe("assistant");
+    expect(result.current.messages[3].content).toBe("Here are the results");
+
+    // Verify the follow-up request included tool messages in correct order
+    const followUpBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const roles = followUpBody.messages.map((m: any) => m.role);
+    expect(roles).toEqual(["user", "assistant", "tool"]);
+  });
 });

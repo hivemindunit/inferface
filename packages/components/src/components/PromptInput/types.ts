@@ -16,7 +16,7 @@ export interface PromptInputProps {
   /** Called when textarea content changes */
   onChange?: (value: string) => void;
   /** Called when the user submits (Enter or Cmd+Enter depending on submitOn) */
-  onSubmit?: (value: string) => void;
+  onSubmit?: (value: string, attachments?: File[]) => void;
   /** True while a request is in flight — disables input and shows loading state */
   isLoading?: boolean;
   /** Called when user clicks the stop button (only shown when isLoading + onStop are set) */
@@ -51,6 +51,12 @@ export interface PromptInputProps {
   selectedModel?: string;
   /** Called when user changes model selection */
   onModelChange?: (modelId: string) => void;
+
+  // === File attachments ===
+  /** Accepted file types for the attachment button (e.g. "image/*"). If set, shows a paperclip button. */
+  accept?: string;
+  /** Called when files are attached (for external state management) */
+  onAttach?: (files: File[]) => void;
 
   // === Appearance ===
   /** Class name on the root element */

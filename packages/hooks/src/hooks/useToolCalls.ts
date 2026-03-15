@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import type { ToolCall, ToolResult, ProviderFormat } from "../types/core";
+import type { Message, ToolCall, ToolResult, ProviderFormat } from "../types/core";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -13,6 +13,13 @@ export interface UseToolCallsOptions {
    * ReadableStream<string> variant is accepted but the string path is primary.
    */
   stream: ReadableStream<string> | string;
+
+  /**
+   * Alternative input: pass committed messages from useChat.
+   * Tool calls are read directly from assistant messages that have `toolCalls`.
+   * When provided alongside `stream`, both sources are merged (deduplicated by id).
+   */
+  messages?: Message[];
 
   /**
    * Auto-execute a tool call. Return the result.
@@ -222,6 +229,64 @@ export function useToolCalls(options: UseToolCallsOptions): UseToolCallsReturn {
       setPendingIds((prev) => new Set([...prev, ...newCalls.map((tc) => tc.id)]));
     }
   }, [options.stream]);
+
+  // Parse tool calls from committed messages (Message[] input)
+  useEffect(() => {
+    if (!options.messages) return;
+
+    const allToolCalls: ToolCall[] = [];
+    for (const msg of options.messages) {
+      if (msg.role === "assistant" && msg.toolCalls) {
+        allToolCalls.push(...msg.toolCalls);
+      }
+    }
+
+    const newCalls = allToolCalls.filter((tc) => !processedIdsRef.current.has(tc.id));
+    if (newCalls.length === 0) return;
+
+    for (const tc of newCalls) {
+      processedIdsRef.current.add(tc.id);
+    }
+
+    setToolCalls((prev) => [...prev, ...newCalls]);
+
+    if (optionsRef.current.onToolCall && depthRef.current < MAX_DEPTH) {
+      depthRef.current++;
+      const newPendingIds = new Set(newCalls.map((tc) => tc.id));
+      setPendingIds((prev) => new Set([...prev, ...newPendingIds]));
+
+      for (const tc of newCalls) {
+        Promise.resolve(optionsRef.current.onToolCall(tc))
+          .then((result) => {
+            setResults((prev) => {
+              const next = new Map(prev);
+              next.set(tc.id, { toolCallId: tc.id, result });
+              return next;
+            });
+            setPendingIds((prev) => {
+              const next = new Set(prev);
+              next.delete(tc.id);
+              return next;
+            });
+          })
+          .catch((err) => {
+            const error = err instanceof Error ? err : new Error(String(err));
+            setResults((prev) => {
+              const next = new Map(prev);
+              next.set(tc.id, { toolCallId: tc.id, result: undefined, error });
+              return next;
+            });
+            setPendingIds((prev) => {
+              const next = new Set(prev);
+              next.delete(tc.id);
+              return next;
+            });
+          });
+      }
+    } else if (!optionsRef.current.onToolCall) {
+      setPendingIds((prev) => new Set([...prev, ...newCalls.map((tc) => tc.id)]));
+    }
+  }, [options.messages]);
 
   const resolveToolCall = useCallback((toolCallId: string, result: unknown) => {
     setResults((prev) => {

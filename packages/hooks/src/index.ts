@@ -16,6 +16,7 @@ export type {
 // Utilities
 export { extractText } from "./types/core";
 export { parseSSEStream, parseOpenAIChunk, parseAnthropicChunk } from "./utils/parseSSE";
+export { fileToBase64 } from "./utils/fileToBase64";
 
 // Hooks
 export { useStream } from "./hooks/useStream";

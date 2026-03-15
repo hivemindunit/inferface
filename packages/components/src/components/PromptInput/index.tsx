@@ -44,6 +44,39 @@ function StopIcon({ className }: { className?: string }) {
   );
 }
 
+function PaperclipIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("h-4 w-4", className)}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M13.5 7.5l-5.793 5.793a2.5 2.5 0 0 1-3.536-3.536L10.464 3.464a1.5 1.5 0 0 1 2.121 2.121L6.293 11.879a.5.5 0 0 1-.707-.707L11.086 5.67" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("h-3 w-3", className)}
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M2 2l8 8M10 2l-8 8" />
+    </svg>
+  );
+}
+
 function SpinnerIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -88,6 +121,8 @@ export function PromptInput({
   models,
   selectedModel,
   onModelChange,
+  accept,
+  onAttach,
   className,
   classNames,
   prepend,
@@ -98,6 +133,10 @@ export function PromptInput({
   const isControlled = valueProp !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue);
   const textValue = isControlled ? valueProp : internalValue;
+
+  // File attachments
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -128,9 +167,27 @@ export function PromptInput({
   const handleSubmit = useCallback(() => {
     const trimmed = textValue.trim();
     if (!trimmed || isLoading || disabled) return;
-    onSubmit?.(trimmed);
+    onSubmit?.(trimmed, attachedFiles.length > 0 ? attachedFiles : undefined);
     if (!isControlled) setInternalValue("");
-  }, [textValue, isLoading, disabled, onSubmit, isControlled]);
+    setAttachedFiles([]);
+  }, [textValue, isLoading, disabled, onSubmit, isControlled, attachedFiles]);
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      if (files.length > 0) {
+        setAttachedFiles((prev) => [...prev, ...files]);
+        onAttach?.(files);
+      }
+      // Reset input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    [onAttach]
+  );
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -167,6 +224,34 @@ export function PromptInput({
         <div className="px-3 py-2 border-b border-border">{contextSlot}</div>
       )}
 
+      {/* Attachment previews */}
+      {attachedFiles.length > 0 && (
+        <div className="px-3 pt-2 flex flex-wrap gap-2">
+          {attachedFiles.map((file, idx) => (
+            <div
+              key={`${file.name}-${idx}`}
+              className="relative group/attachment inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 px-2 py-1 text-xs text-muted-foreground"
+            >
+              {file.type.startsWith("image/") ? (
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  className="h-8 w-8 rounded object-cover"
+                />
+              ) : null}
+              <span className="max-w-[120px] truncate">{file.name}</span>
+              <button
+                onClick={() => removeAttachment(idx)}
+                className="ml-0.5 p-0.5 rounded-full hover:bg-muted transition-colors"
+                aria-label={`Remove ${file.name}`}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Textarea */}
       <div className="p-3">
         <textarea
@@ -194,6 +279,29 @@ export function PromptInput({
           classNames?.toolbar
         )}
       >
+        {/* Attachment button */}
+        {accept && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+              aria-label="Attach files"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={disabled || isLoading}
+              className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+              aria-label="Attach file"
+            >
+              <PaperclipIcon />
+            </button>
+          </>
+        )}
+
         {/* Model selector */}
         {models && models.length > 0 && (
           <select

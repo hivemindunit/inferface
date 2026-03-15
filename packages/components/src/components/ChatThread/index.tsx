@@ -352,9 +352,26 @@ export function ChatThread({
                         markdown={renderMarkdown}
                       />
                     ) : (
-                      <pre className="whitespace-pre-wrap font-sans">
-                        {getTextContent(msg.content)}
-                      </pre>
+                      <>
+                        {/* Render image_url content parts as thumbnails */}
+                        {Array.isArray(msg.content) && (
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {msg.content
+                              .filter((p): p is { type: "image_url"; image_url: { url: string; alt?: string } } => p.type === "image_url")
+                              .map((p, i) => (
+                                <img
+                                  key={i}
+                                  src={p.image_url.url}
+                                  alt={p.image_url.alt ?? "Attached image"}
+                                  className="max-h-40 rounded-lg object-cover"
+                                />
+                              ))}
+                          </div>
+                        )}
+                        <pre className="whitespace-pre-wrap font-sans">
+                          {getTextContent(msg.content)}
+                        </pre>
+                      </>
                     )}
                   </div>
                 )}

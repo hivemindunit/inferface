@@ -38,6 +38,7 @@ export default function ChatDemo() {
     deleteMessage,
     editAndResend,
     submitToolResults,
+    setBody,
   } = useChat({
     api: "/api/chat",
     providerFormat: "openai",
@@ -79,6 +80,7 @@ export default function ChatDemo() {
                 deleteMessage,
                 editAndResend,
                 submitToolResults,
+                setBody,
               }}
               className="flex-1 min-h-0"
             />
@@ -92,9 +94,10 @@ export default function ChatDemo() {
 
             {/* PromptInput */}
             <PromptInput
-              onSubmit={send}
+              onSubmit={(text, attachments) => send(text, attachments)}
               isLoading={isLoading}
               onStop={abort}
+              accept="image/*"
               className="border-t border-border"
             />
 
