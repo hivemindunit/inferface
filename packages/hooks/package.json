@@ -1,6 +1,6 @@
 {
   "name": "@inferface/hooks",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Headless React hooks for streaming AI interfaces",
   "keywords": ["react", "ai", "streaming", "llm", "hooks", "genai"],
   "homepage": "https://inferface.dev",

@@ -154,13 +154,24 @@ export function useChat(options: UseChatOptions): UseChatReturn {
 
       const opts = optionsRef.current;
 
-      // Build the messages payload for the API
-      const apiMessages: Array<{ role: string; content: string | ContentPart[] }> = [];
+      // Build the messages payload for the API.
+      // Preserve toolCalls on assistant messages and toolCallId on tool messages
+      // so API routes can forward them correctly to providers (e.g. OpenAI requires
+      // tool result messages to reference the preceding assistant tool_calls).
+      const apiMessages: Array<{
+        role: string;
+        content: string | ContentPart[];
+        toolCalls?: ToolCall[];
+        toolCallId?: string;
+      }> = [];
       if (opts.systemPrompt) {
         apiMessages.push({ role: "system", content: opts.systemPrompt });
       }
       for (const msg of requestMessages) {
-        apiMessages.push({ role: msg.role, content: msg.content });
+        const entry: typeof apiMessages[number] = { role: msg.role, content: msg.content };
+        if (msg.toolCalls && msg.toolCalls.length > 0) entry.toolCalls = msg.toolCalls;
+        if (msg.toolCallId) entry.toolCallId = msg.toolCallId;
+        apiMessages.push(entry);
       }
 
       // Merge body: base body + per-request body (per-request wins)
